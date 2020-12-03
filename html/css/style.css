@@ -5,7 +5,14 @@
 }
 
 .flex-container {
-    border: 0.5px solid grey;
+    border: 0.5px solid gray;
+    display: flex;
+    flex-wrap: nowwrap;
+    flex-direction: row;
+}
+
+.flex-container2 {
+    border: 0.5px solid gray;
     display: flex;
     flex-wrap: nowwrap;
     flex-direction: row;
@@ -23,7 +30,7 @@
 }
 
 .item2 {
-    flex-grow: 6;
+    flex-grow: 8;
 }
 
 .close {
