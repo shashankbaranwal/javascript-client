@@ -1,0 +1,47 @@
+.container {
+    border: 0.5px solid gray;
+    margin: 100px;
+    box-shadow: 5px 10px 18px gray;
+}
+
+.flex-container {
+    border: 0.5px solid grey;
+    display: flex;
+    flex-wrap: nowwrap;
+    flex-direction: row;
+}
+
+.flex-item {
+    padding-left: 10px;
+    text-align: left;
+    line-height: 50px;
+    font-size: 15px;
+}
+
+.item1 {
+    flex-grow: 3;
+}
+
+.item2 {
+    flex-grow: 6;
+}
+
+.close {
+    padding: 20px;
+}
+
+.background {
+    background-color: rgb(216, 206, 206);
+}
+
+/* Display list of items side by side */
+ul.breadcrumb li {
+    display: inline;
+    font-size: 17px;
+}
+/* Add a slash symbol (/) before each list item */
+ul.breadcrumb li+li:before {
+    padding: 8px;
+    color: black;
+    content: "/\00a0";
+}
