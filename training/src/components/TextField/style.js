@@ -1,13 +1,14 @@
 import styled, { css } from 'styled-components';
 
 const Div = styled.div`
-margin: 2%;
+padding: 1px;
+border: 0.1px solid black;
 `;
 const Error = styled.p`
 color: red;
 `;
 const Input = styled.input`
-width: 100%;
+width: 98%;
 padding: 0.7%;
 border: 1px solid gray;
 border-radius: 5px;

@@ -6,20 +6,17 @@ class TextFieldDemo extends Component {
   render() {
     return (
       <>
-        <body>
-          <border>
-            <Div>
-              <p><b>This is a Disabled Input</b></p>
-              < TextField disabled value="Disabled Input"
-              />
-              <p><b>A valid Input</b></p>
-              < TextField value="Accessible" />
+        <Div>
+          
+          <p><b>This is a Disabled Input</b></p>
+          < TextField disabled value="Disabled Input"
+          />
+          <p><b>A valid Input</b></p>
+          < TextField value="Accessible" />
 
-              <p><b>An Input With Errors</b></p>
-              < TextField value="101" error="Cloud not be greater than" />
-            </Div>
-          </border>
-        </body>
+          <p><b>An Input With Errors</b></p>
+          < TextField value="101" error="Cloud not be greater than" />
+        </Div>
       </>
     )
   }
