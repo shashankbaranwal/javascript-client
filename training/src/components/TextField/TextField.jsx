@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Error, Input } from './style'
 class TextField extends Component {
     render() {
-        const { value, disabled, error }= this.props;
+        // eslint-disable-next-line react/prop-types
+        const { value, disabled, error } = this.props;
         if(error){
            return(
                <>
