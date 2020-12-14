@@ -4,6 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
+.eslintcache
+.eslintrc.json
+package-lock.json
+.vscode
 
 # testing
 /coverage
