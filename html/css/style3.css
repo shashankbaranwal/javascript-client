@@ -15,7 +15,7 @@ body, html{
     display: flex;
     margin: auto;
     width: 100%;
-    height: 5%;
+    height: 6%;
     flex-wrap: nowwrap;
     flex-direction: row;
     }
@@ -31,13 +31,13 @@ body, html{
     padding-left: 10px;
     text-align: left;
     line-height: 33px;
-    font-size: 15px;
+    font-size: 18px;
     }
 
 .item1 {
     flex-grow: 3;
     font-family: "Times New Roman", Times, serif;
-    color: rgb(97, 92, 92);
+    color: rgb(66, 64, 64);
     }
    
 .item2 {
@@ -45,7 +45,7 @@ body, html{
     padding-left: 10px;
     text-align: left;
     line-height: 33px;
-    font-size: 1px;
+    font-size: 10px;
     font-family: "Arial";
     color: rgb(97, 92, 92);
         }
@@ -103,25 +103,25 @@ body, html{
     
 #name,
 #acc {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     margin-left: 20%;
     padding: 1%;
     width: 50%;
 }
 #exp {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     margin-left: 20%;
     padding: 1%;
-    width: 25%
+    width: 24.5%
 }
 
 #cvv {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     padding: 1%;
-    width: 25%
+    width: 24.5%
 }
 
 .button {
@@ -203,19 +203,20 @@ ul.breadcrumb li+li:before {
 }
 
 .second {
-    padding-top: 8%;
-    flex: 1;
+    padding-top: 23%;
+    flex: 10;
 }
 
 .summary {
     display: flex;
     flex-direction: row;
+    font-size: 12px;
 }
 
 .price {
     text-align: right;
     flex: 1;
-    font-size: 15px;
+    font-size: 12px;
 }
 
 @media (min-width:992px) {
