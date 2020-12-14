@@ -1,4 +1,4 @@
-body, html{
+body, html {
     background-image: url('../images/background.jpg');
     border: transparent solid 1px;
 }
@@ -16,7 +16,7 @@ body, html{
     display: flex;
     margin: auto;
     width: 100%;
-    height: 5%;
+    height: 6%;
     flex-wrap: nowwrap;
     flex-direction: row;
 }
@@ -46,7 +46,7 @@ body, html{
     padding-left: 10px;
     text-align: left;
     line-height: 33px;
-    font-size: 1px;
+    font-size: 10px;
     font-family: "Arial";
     color: rgb(97, 92, 92);
         }
@@ -106,7 +106,7 @@ body, html{
     
 #name,
 #acc {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     margin-left: 20%;
     padding-bottom: 5%;
@@ -114,18 +114,18 @@ body, html{
     width: 50%;
 }
 #exp {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     margin-left: 20%;
     padding: 1%;
-    width: 25%
+    width: 24.5%
 }
 
 #cvv {
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid grey;
     padding: 1%;
-    width: 25%
+    width: 24.5%
 }
 
 .button {
@@ -212,10 +212,11 @@ ul.breadcrumb li+li:before {
 .summary {
     display: flex;
     flex-direction: row;
+    font-size: 12px;
 }
 
 .price {
     text-align: right;
     flex: 1;
-    font-size: 15px;
-}
+    font-size: 12px;
+} 
