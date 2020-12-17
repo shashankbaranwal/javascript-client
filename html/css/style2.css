@@ -2,6 +2,7 @@ body, html {
     background-image: url('../images/background.jpg');
     border: transparent solid 1px;
 }
+
 .container {
     border: 0.1px solid rgb(214, 212, 212);
     margin: 50px;
@@ -18,27 +19,27 @@ body, html {
     height: 6%;
     flex-wrap: nowwrap;
     flex-direction: row;
-    }
+}
 
 .second-flex-container {
     display: flex;
     flex: 1;
-    border: 1px solid #dcd6d6;
+    border: 0.1px solid #dcd6d6;
     background-color: white;
-        }
+}
 
 .flex-item {
     padding-left: 10px;
     text-align: left;
     line-height: 33px;
-    font-size: 18px;
-    }
+    font-size: 15px;
+}
 
 .item1 {
     flex-grow: 3;
     font-family: "Times New Roman", Times, serif;
-    color: rgb(66, 64, 64);
-    }
+    color: rgb(97, 92, 92);
+}
    
 .item2 {
     flex-grow: 20;
@@ -59,20 +60,19 @@ body, html {
     display: flex;
     flex-direction: column;
     padding: 1%;
-    }
+}
 
 .wallet {
     color: gray;
     padding-top: 3%;
     flex: 12;
     flex-grow: 12;
-    }
+}
     
 .image {
     display: flex;
     flex-direction: row;
-
-    }
+}
     
 .co_image {
     flex: 0.4;
@@ -95,9 +95,12 @@ body, html {
     box-shadow: 0 0 5px rgb(22, 22, 22);
     }
 
+
+
 .newcard {
     color: gray;
-    padding-top: 2%;
+    margin-bottom: 5%;
+    padding-bottom: 2%;
     flex: 2;
     }
     
@@ -106,7 +109,7 @@ body, html {
     border-radius: 3px;
     border: 1px solid grey;
     margin-left: 20%;
-    padding-bottom: 50;
+    padding-bottom: 5%;
     padding: 1%;
     width: 50%;
 }
@@ -141,41 +144,39 @@ body, html {
     flex-direction: column;
     padding: 1%;
     background-color: #eaeaea;
-    }
-
-
+}
 
 .background {    
     background-color: rgb(224, 224, 224);
-    }
+}
 
-    /* Display list of items side by side */
-    
+/* Display list of items side by side */
+
 ul.breadcrumb li {
     font-family: "Times New Roman", Times, serif;
     display: inline;
     font-size: 15px;
-    }
+}
     
-    /* Add a slash symbol (/) before each list item */
+/* Add a slash symbol (/) before each list item */
     
 ul.breadcrumb li+li:before {    
     padding: 3px;
     color: black;
     content: "/\00a0";
-    }
+}
     
 .item_image {
     border: 5px solid gray;
     width: 65px;
     height: 65px;
-    }
+}
    
 .co_image:hover {
     border-radius: 1px;
     border: 2px solid #e4e4e4;
     background-color: #e4e4e4;
-    }
+}
 
 .amt {
     margin-left: 1%;
@@ -204,8 +205,8 @@ ul.breadcrumb li+li:before {
 }
 
 .second {
-    padding-top: 23%;
-    flex: 10;
+    padding-top: 20%;
+    flex: 1;
 }
 
 .summary {
