@@ -35,13 +35,11 @@ body, html {
     font-size: 15px;
 }
 
-
 .item1 {
     flex-grow: 3;
     font-family: "Times New Roman", Times, serif;
     color: rgb(97, 92, 92);
 }
-
    
 .item2 {
     flex-grow: 20;
