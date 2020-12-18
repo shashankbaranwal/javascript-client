@@ -17,11 +17,7 @@ class Slider extends Component {
     const { random, duration } = this.props;
     let { current } = this.state;
     this.id = setInterval(() => {
-      if (random) {
-        current = getRandomNumber(total);
-      } else {
-        current = getNextRoundRobin(current, total);
-      }
+      current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
       this.setState({ current });
     }, duration);
   }
