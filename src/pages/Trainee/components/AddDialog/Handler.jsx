@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { TextField, InputAdornment } from '@material-ui/core';
 
-export const Handler = (props) => {
+export default function Handler(props) {
   const {
     error, helperText, onChange, onBlur, label, type, icons,
   } = props;
@@ -31,8 +31,7 @@ export const Handler = (props) => {
       />
     </>
   );
-};
-
+}
 Handler.propTypes = {
   error: PropTypes.bool,
   helperText: PropTypes.string,

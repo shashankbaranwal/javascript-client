@@ -3,11 +3,13 @@ import React from 'react';
 // import { TextFieldDemo } from './pages/index';
 // import { InputDemo } from './pages/InputDemo';
 // import { ChildrenDemo } from './pages';
-import { Trainee } from './pages/Trainee';
+import { Login } from './pages/Login';
+// import { Trainee } from './pages/Trainee';
 
 function App() {
   return (
-    <Trainee />
+    <Login />
+    // <Trainee />
   );
 }
 
