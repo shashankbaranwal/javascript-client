@@ -1,8 +1,6 @@
 import React from 'react';
-import { TextFieldDemo } from './pages';
+import { TextFieldDemo } from './pages/index';
 
-const App = () => (
+export const App = () => (
   <TextFieldDemo />
 );
-
-export default App;

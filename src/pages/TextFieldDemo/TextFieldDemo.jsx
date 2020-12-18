@@ -1,9 +1,12 @@
 import React from 'react';
-import { TextField } from '../../components';
+import { TextField, Slider } from '../../components';
+import { banners, DEFAULT_BANNER_IMAGE } from '../../config/constants';
 
-// eslint-disable-next-line react/prefer-stateless-function
 export const TextFieldDemo = () => (
   <>
+    <div>
+      <Slider altText="No Image" duration="1000" height="300" random banner={banners} defaultbanner={DEFAULT_BANNER_IMAGE} />
+    </div>
     <p><b>This is a Disabled Input</b></p>
     <TextField
       disabled

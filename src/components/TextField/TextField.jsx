@@ -1,8 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Error, Input } from './style';
 
-export const TextField = (props) => {
-  // eslint-disable-next-line react/prop-types
+const TextField = (props) => {
   const { value, disabled, error } = props;
   if (error) {
     return (
@@ -15,4 +15,14 @@ export const TextField = (props) => {
   return (
     <Input type="text" value={value} disabled={disabled} />
   );
+};
+export default TextField;
+TextField.propTypes = {
+  value: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+};
+TextField.defaultProps = {
+  disabled: false,
+  error: '',
 };
