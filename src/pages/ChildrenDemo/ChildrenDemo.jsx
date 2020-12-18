@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 import { ThemeProvider } from '@material-ui/core';
 import Text from '../../components/Math/Math';
