@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 import * as yup from 'yup';
 import PropTypes from 'prop-types';
@@ -119,7 +118,6 @@ class Login extends React.Component {
                       fullWidth
                       id="outlined-required"
                       label="Password"
-                      defaultValue=" "
                       variant="outlined"
                       helperText={this.getError('password')}
                       error={!!this.getError('password')}
