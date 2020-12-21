@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Error, Input } from './style';
@@ -23,10 +24,9 @@ TextField.propTypes = {
   value: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   error: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
 };
 TextField.defaultProps = {
   disabled: false,
   error: '',
-  onChange: '',
 };

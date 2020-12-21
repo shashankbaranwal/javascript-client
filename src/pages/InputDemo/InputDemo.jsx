@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import React from 'react';
 import { TextField, SelectField, RadioField } from '../../components';
-import { selectOptions, radioOptionsCricket, radioOptionsFootball } from '../../config/constants';
+import { sports, cricketOptions, footballOptions } from '../../config/constants';
 
 class InputDemo extends React.Component {
   constructor(props) {
@@ -14,68 +14,65 @@ class InputDemo extends React.Component {
     };
   }
 
-    handleNameChange = (e) => {
-      this.setState({ name: e.target.value }, () => {
-        console.log(this.state);
-      });
-    }
+  handleNameChange = (e) => {
+    this.setState({ name: e.target.value }, () => {
+      console.log(this.state);
+    });
+  }
 
-    handleSportChange = (e) => {
-      this.setState({ sport: e.target.value }, () => console.log(this.state));
-      if (e.target.value === 'Select') {
-        this.setState({ sport: '' });
-      }
-      return e.target.value === 'cricket' ? this.setState({ football: '' }) : this.setState({ cricket: '' });
-    }
+  handleSportChange = (e) => {
+    const sportChange = e.target.value;
+    this.setState({
+      sport: sportChange,
+      cricket: '',
+      football: '',
+    });
+  }
 
-    handlePositionChange = (e) => {
-      const { sport } = this.state;
-      return sport === 'cricket' ? this.setState({ cricket: e.target.value }, () => console.log(this.state)) : this.setState({ football: e.target.value }, () => console.log(this.state));
-    }
+  handleCricketChange = (e) => {
+    this.setState({ cricket: e.target.value }, () => {
+      console.log(this.state);
+    });
+  }
 
-      RadioOption = () => {
-        let { radioValue } = this.state;
-        const { sport } = this.state;
-        if (sport === 'cricket') {
-          radioValue = radioOptionsCricket;
-        } else if (sport === 'football') {
-          radioValue = radioOptionsFootball;
-        }
-        return (radioValue);
-      };
+  handleFootballChange = (e) => {
+    this.setState({ football: e.target.value }, () => {
+      console.log(this.state);
+    });
+  }
 
-      render() {
-        const { sport } = this.state;
-        return (
-          <>
-            <div>
-              <p><b>Name:</b></p>
-              <TextField error="" onChange={this.handleNameChange} />
-              <p><b>Select the game you play?</b></p>
-              <SelectField
-                error=""
-                onChange={this.handleSportChange}
-                options={selectOptions}
-                defaultText="Select"
-              />
-              <div>
-                {
-                  (sport === '' || sport === 'Select') ? ''
-                    : (
-                      <>
-                        <p><b>What you do?</b></p>
-                        <RadioField
-                          error=""
-                          options={this.RadioOption()}
-                          onChange={this.handlePositionChange}
-                        />
-                      </>
-                    )
-                }
-              </div>
-            </div>
-          </>
-        );
-      }
+  render() {
+    const { sport } = this.state;
+    return (
+      <>
+        <div>
+          <p><b>Name:</b></p>
+          <TextField error="" onChange={this.handleNameChange} />
+          <p><b>Select the game you play?</b></p>
+          <SelectField
+            error=""
+            onChange={this.handleSportChange}
+            options={sports}
+            defaultText="Select"
+          />
+          <div>
+            {
+              (sport === '') ? ''
+                : (
+                  <>
+                    <p><b>What you do?</b></p>
+                    <RadioField
+                      error=""
+                      options={sport === 'cricket' ? cricketOptions : footballOptions}
+                      onChange={sport === 'cricket' ? this.handleCricketChange : this.handleFootballChange}
+                    />
+                  </>
+                )
+            }
+          </div>
+        </div>
+      </>
+    );
+  }
 }
 export default InputDemo;
