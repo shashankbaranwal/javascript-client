@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 import { TextField, Slider } from '../../components';
 import { banners, DEFAULT_BANNER_IMAGE } from '../../config/constants';
