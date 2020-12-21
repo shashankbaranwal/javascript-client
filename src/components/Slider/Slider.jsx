@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { PUBLIC_IMAGE_FOLDER, DEFAULT_BANNER_IMAGE, total } from '../../config/constants';
 import Img from './style';
-import { getRandomNumber, getNextRoundRobin } from '../../libs/config/math';
+import { getRandomNumber, getNextRoundRobin } from '../../libs/utils/math';
 
 class Slider extends Component {
   constructor(props) {
@@ -17,11 +17,7 @@ class Slider extends Component {
       const { random, duration } = this.props;
       let { current } = this.state;
       this.id = setInterval(() => {
-        if (random) {
-          current = getRandomNumber(total);
-        } else {
-          current = getNextRoundRobin(current, total);
-        }
+        current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
         this.setState({ current });
       }, duration);
     }
@@ -35,12 +31,12 @@ class Slider extends Component {
       const {
         altText, height, duration, banner,
       } = this.props;
-      const { defaultbanner } = this.props;
+      const { defaultBanner } = this.props;
       if (current === -1 || banner.length === 0) {
         return (
           <>
             <div align="center">
-              <Img src={`${defaultbanner}`} alt={altText} height={height} duration={duration} />
+              <Img src={`${defaultBanner}`} alt={altText} height={height} duration={duration} />
             </div>
           </>
         );
@@ -58,7 +54,7 @@ export default Slider;
 Slider.propTypes = {
   altText: PropTypes.string,
   banner: PropTypes.arrayOf(PropTypes.string),
-  defaultbanner: PropTypes.string,
+  defaultBanner: PropTypes.string,
   duration: PropTypes.number,
   height: PropTypes.number,
   random: PropTypes.bool,
@@ -66,7 +62,7 @@ Slider.propTypes = {
 Slider.defaultProps = {
   altText: 'default banner',
   banner: [],
-  defaultbanner: DEFAULT_BANNER_IMAGE,
+  defaultBanner: DEFAULT_BANNER_IMAGE,
   duration: 2000,
   height: 200,
   random: false,
