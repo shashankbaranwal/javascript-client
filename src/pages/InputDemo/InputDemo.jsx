@@ -5,7 +5,7 @@ import {
   TextField, SelectField, RadioField, ButtonField,
 } from '../../components';
 
-import { selectOptions, radioOptionsCricket, radioOptionsFootball } from '../../config/constants';
+import { sports, cricketOptions, footballOptions } from '../../config/constants';
 
 class InputDemo extends React.Component {
     schema = yup.object().shape({
@@ -38,28 +38,25 @@ class InputDemo extends React.Component {
     }
 
     handleSportChange = (e) => {
-      this.setState({ sport: e.target.value }, () => console.log(this.state));
-      if (e.target.value === 'Select') {
-        this.setState({ sport: '' });
-      }
-      return e.target.value === 'cricket' ? this.setState({ football: '' }) : this.setState({ cricket: '' });
+      const select = e.target.value;
+      this.setState({
+        sport: select,
+        cricket: '',
+        football: '',
+      });
     }
 
-    handlePositionChange = (e) => {
-      const { sport } = this.state;
-      return sport === 'cricket' ? this.setState({ cricket: e.target.value }, () => console.log(this.state)) : this.setState({ football: e.target.value }, () => console.log(this.state));
+    handleCricketChange = (e) => {
+      this.setState({ cricket: e.target.value }, () => {
+        console.log(this.state);
+      });
     }
 
-    RadioOption = () => {
-      let { radioValue } = this.state;
-      const { sport } = this.state;
-      if (sport === 'cricket') {
-        radioValue = radioOptionsCricket;
-      } else if (sport === 'football') {
-        radioValue = radioOptionsFootball;
-      }
-      return (radioValue);
-    };
+    handleFootballChange = (e) => {
+      this.setState({ football: e.target.value }, () => {
+        console.log(this.state);
+      });
+    }
 
     // eslint-disable-next-line consistent-return
     getError = (field) => {
@@ -103,20 +100,20 @@ class InputDemo extends React.Component {
             <SelectField
               error={this.getError('sport')}
               onChange={this.handleSportChange}
-              options={selectOptions}
+              options={sports}
               defaultText="Select"
               onBlur={() => this.isTouched('sport')}
             />
             <div>
               {
-                (sport === '' || sport === 'Select') ? ''
+                (sport === '') ? ''
                   : (
                     <>
                       <p><b>What you do?</b></p>
                       <RadioField
                         error={this.getError(sport)}
-                        options={this.RadioOption()}
-                        onChange={this.handlePositionChange}
+                        options={sport === 'cricket' ? cricketOptions : footballOptions}
+                        onChange={sport === 'cricket' ? this.handleCricketChange : this.handleFootballChange}
                         onBlur={() => this.isTouched(sport)}
                       />
                     </>
