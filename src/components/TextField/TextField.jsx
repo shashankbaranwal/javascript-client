@@ -25,11 +25,10 @@ TextField.propTypes = {
   value: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   error: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
   onBlur: PropTypes.string.isRequired,
 };
 TextField.defaultProps = {
   disabled: false,
   error: '',
-  onChange: '',
 };
