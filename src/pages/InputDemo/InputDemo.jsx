@@ -37,12 +37,10 @@ class InputDemo extends React.Component {
       });
     }
 
-    handleSportChange = (e) => {
-      const select = e.target.value;
-      this.setState({
-        sport: select,
-        cricket: '',
-        football: '',
+    handleSportsChange = (e) => {
+      this.sportsState();
+      this.setState({ sports: e.target.value }, () => {
+        console.log(this.state);
       });
     }
 
