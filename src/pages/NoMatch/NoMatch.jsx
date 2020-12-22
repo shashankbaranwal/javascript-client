@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
 import PropType from 'prop-types';
 import {
@@ -19,7 +18,7 @@ const theme = createMuiTheme({
     ].join(','),
   },
 });
-function NotFound(props) {
+const NotFound = (props) => {
   const { classes } = props;
   return (
     <>
@@ -37,8 +36,10 @@ function NotFound(props) {
       </ThemeProvider>
     </>
   );
-}
+};
+
 NotFound.propTypes = {
   classes: PropType.objectOf(PropType.string).isRequired,
 };
+
 export default withStyles(styles)(NotFound);
