@@ -6,11 +6,9 @@ import React from 'react';
 import { Login } from './pages/Login';
 // import { Trainee } from './pages/Trainee';
 
-function App() {
-  return (
-    <Login />
-    // <Trainee />
-  );
-}
+const App = () => (
+  <Login />
+  // <Trainee />
+);
 
 export default App;
