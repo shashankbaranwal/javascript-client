@@ -4,10 +4,8 @@ import React from 'react';
 // import { InputDemo } from './pages/InputDemo';
 import { ChildrenDemo } from './pages';
 
-function App() {
-  return (
-    <ChildrenDemo />
-  );
-}
+const App = () => (
+  <ChildrenDemo />
+);
 
 export default App;
