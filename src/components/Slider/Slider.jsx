@@ -13,41 +13,42 @@ class Slider extends Component {
     };
   }
 
-  componentDidMount = () => {
-    const { random, duration } = this.props;
-    let { current } = this.state;
-    this.id = setInterval(() => {
-      current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
-      this.setState({ current });
-    }, duration);
-  }
+    componentDidMount = () => {
+      const { random, duration } = this.props;
+      let { current } = this.state;
+      this.id = setInterval(() => {
+        current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
+        this.setState({ current });
+      }, duration);
+    }
 
-  componentWillUnmount = () => {
-    clearInterval(this.id);
-  }
+    componentWillUnmount = () => {
+      clearInterval(this.id);
+    }
 
-  render() {
-    const { current } = this.state;
-    const {
-      altText, height, duration, banner, defaultBanner,
-    } = this.props;
-    if (current === -1 || banner.length === 0) {
+    render() {
+      const { current } = this.state;
+      const {
+        altText, height, duration, banner,
+      } = this.props;
+      const { defaultBanner } = this.props;
+      if (current === -1 || banner.length === 0) {
+        return (
+          <>
+            <div align="center">
+              <Img src={`${defaultBanner}`} alt={altText} height={height} duration={duration} />
+            </div>
+          </>
+        );
+      }
       return (
         <>
           <div align="center">
-            <Img src={`${defaultBanner}`} alt={altText} height={height} duration={duration} />
+            <Img src={`${PUBLIC_IMAGE_FOLDER}${banner[current]}`} alt={altText} height={height} duration={duration} />
           </div>
         </>
       );
     }
-    return (
-      <>
-        <div align="center">
-          <Img src={`${PUBLIC_IMAGE_FOLDER}${banner[current]}`} alt={altText} height={height} duration={duration} />
-        </div>
-      </>
-    );
-  }
 }
 export default Slider;
 Slider.propTypes = {
