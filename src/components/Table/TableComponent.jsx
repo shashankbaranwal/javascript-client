@@ -24,7 +24,7 @@ const useStyles = (theme) => ({
 
 });
 
-function TableComponent(props) {
+const TableComponent = (props) => {
   const {
     // eslint-disable-next-line react/prop-types
     classes, data, column, order, orderBy, onSort, onSelect,
@@ -72,7 +72,7 @@ function TableComponent(props) {
       </Table>
     </TableContainer>
   );
-}
+};
 TableComponent.propTypes = {
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
