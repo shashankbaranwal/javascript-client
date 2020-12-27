@@ -1,6 +1,7 @@
 import styled, { css } from 'styled-components';
 
 const Div = styled.div`
+
 padding: 20px;
 border: 0.1px solid black;
 `;
