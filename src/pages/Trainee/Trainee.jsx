@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
 import { Button } from '@material-ui/core';
 import { AddDialog } from './components';
