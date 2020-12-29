@@ -1,9 +1,11 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 // import { TextFieldDemo } from './pages/index';
-import { InputDemo } from './pages';
+// import { InputDemo } from './pages/InputDemo';
+import { ChildrenDemo } from './pages';
 
 const App = () => (
-  <InputDemo />
+  <ChildrenDemo />
 );
 
 export default App;

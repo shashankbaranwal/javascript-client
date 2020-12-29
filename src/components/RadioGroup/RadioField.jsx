@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Input, Err } from './style';
