@@ -1,152 +1,160 @@
+/* eslint-disable no-console */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import React from 'react';
+import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import { Typography, InputAdornment, Container } from '@material-ui/core';
+import LockRoundedIcon from '@material-ui/icons/LockRounded';
+import MailIcon from '@material-ui/icons/Mail';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import * as yup from 'yup';
-import PropTypes from 'prop-types';
-import {
-  TextField, CssBaseline, Card, Typography, Avatar,
-  CardContent, withStyles, InputAdornment, Button,
-} from '@material-ui/core';
-import { Email, VisibilityOff, LockOutlined } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core/styles';
 
-const Design = (theme) => ({
+const useStyles = makeStyles((theme) => ({
+  container: {
+    border: '1px solid silver',
+    boxShadow: '1px 2px 3px silver',
+    marginTop: '100px',
+    width: '400px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
   icon: {
-    background: 'red',
-    marginLeft: theme.spacing(22),
-    marginTop: theme.spacing(2),
+    backgroundColor: 'red',
+    color: 'white',
+    borderRadius: '50%',
+    alignSelf: 'center',
+    padding: '5px',
+    marginTop: '20px',
+    marginBottom: '10px',
   },
-  main: {
-    width: 400,
-    marginTop: theme.spacing(20),
-    marginLeft: theme.spacing(58),
+  components: {
+    marginRight: theme.spacing(4),
   },
-});
-class Login extends React.Component {
-    schema = yup.object().shape({
-      email: yup.string()
-        .trim().email().required('Email Address is a required field'),
-      password: yup.string()
-        .required('Password is required')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, 'Must contain 8 characters, at least one uppercase letter, one lowercase letter and one number'),
-    });
+  login: {
+    alignSelf: 'center',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    fontSize: '25px',
+  },
+  input: {
+    alignSelf: 'center',
+    margin: '15px 0px',
+  },
+  signin: {
+    margin: '20px',
+    alignSelf: 'center',
+    padding: '10px',
+    boxSizing: 'border-box',
+  },
+}));
 
-    constructor(props) {
-      super(props);
-      this.state = {
-        Email: '',
-        Password: '',
-        touched: {
-          email: false,
-          password: false,
-        },
-      };
+const Login = () => {
+  const classes = useStyles();
+  const [open, setopen] = useState({
+    openDialog: true,
+  });
+
+  const [state, setstate] = useState({
+    Email: '', Password: '',
+  });
+
+  const [blur, setblur] = useState({
+    Email: false, Password: false,
+  });
+
+  const schema = yup.object().shape({
+    Email: yup.string().email().required(),
+    Password: yup.string().required().min(8).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/, 'Must contain 8 characters, at least one uppercase letter, one lowercase letter and one number'),
+  });
+
+  const handleEmailChange = (event) => {
+    setstate({ ...state, Email: event.target.value });
+  };
+
+  const handlePasswordChange = (event) => {
+    setstate({ ...state, Password: event.target.value });
+  };
+
+  const hasError = () => {
+    try {
+      return !schema.validateSync(state);
+    } catch (err) {
+      return true;
     }
+  };
 
-    handleChange = (key) => ({ target: { value } }) => {
-      this.setState({ [key]: value });
-    };
+  const handleBlur = (field) => {
+    setblur({ ...blur, [field]: true });
+  };
 
-    hasErrors = () => {
+  const isTouched = () => (blur.Password || blur.Email);
+
+  const handleClose = () => {
+    setopen({ ...open, openDialog: false });
+    console.log(state);
+  };
+
+  const getError = (field) => {
+    if (blur[field] && hasError()) {
       try {
-        this.schema.validateSync(this.state);
+        schema.validateSyncAt(field, state);
       } catch (err) {
-        return true;
+        return err.message;
       }
-      return false;
     }
+    return null;
+  };
 
-    // eslint-disable-next-line consistent-return
-    getError = (field) => {
-      const { touched } = this.state;
-      if (touched[field] && this.hasErrors()) {
-        try {
-          this.schema.validateSyncAt(field, this.state);
-          return '';
-        } catch (err) {
-          return err.message;
-        }
-      }
-    };
-
-    isTouched = (field) => {
-      const { touched } = this.state;
-      this.setState({
-        touched: {
-          ...touched,
-          [field]: true,
-        },
-      });
-    }
-
-    render() {
-      const { classes } = this.props;
-      return (
-        <>
-          <div className={classes.main}>
-            <CssBaseline />
-            <Card open aria-labelledby="form-dialog-title">
-              <Avatar className={classes.icon}>
-                <LockOutlined />
-              </Avatar>
-              <Typography variant="h3" align="center">Login</Typography>
-              <CardContent>
-                <form>
-                  <div>
-                    <TextField
-                      required
-                      fullWidth
-                      id="outlined-required"
-                      label="Email Address"
-                      defaultValue=" "
-                      variant="outlined"
-                      helperText={this.getError('email')}
-                      error={!!this.getError('email')}
-                      onChange={this.handleChange('email')}
-                      onBlur={() => this.isTouched('email')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Email />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </div>
-                  <br />
-                  <div>
-                    <TextField
-                      required
-                      type="password"
-                      fullWidth
-                      id="outlined-required"
-                      label="Password"
-                      defaultValue=" "
-                      variant="outlined"
-                      helperText={this.getError('password')}
-                      error={!!this.getError('password')}
-                      onChange={this.handleChange('password')}
-                      onBlur={() => this.isTouched('password')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <VisibilityOff />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </div>
-                &nbsp;
-                  <div>
-                    <Button variant="contained" color="primary" disabled={this.hasErrors()} fullWidth>SIGN IN</Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      );
-    }
-}
-Login.propTypes = {
-  classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  return (
+    <Container className={classes.container} fullWidth aria-labelledby="form-dialog-title">
+      <LockRoundedIcon className={classes.icon} />
+      <Typography id="form-dialog-title" className={classes.login}>Login</Typography>
+      <TextField
+        className={classes.input}
+        size="medium"
+        id="Email"
+        label="Email"
+        type="email"
+        variant="outlined"
+        error={getError('Email')}
+        helperText={getError('Email')}
+        onChange={handleEmailChange}
+        onBlur={() => handleBlur('Email')}
+        fullWidth
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <MailIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        className={classes.input}
+        size="medium"
+        id="Password"
+        label="Password"
+        type="password"
+        variant="outlined"
+        error={getError('Password')}
+        helperText={getError('Password')}
+        onChange={handlePasswordChange}
+        onBlur={() => handleBlur('Password')}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <VisibilityOffIcon />
+            </InputAdornment>
+          ),
+        }}
+        fullWidth
+      />
+      <Button fullWidth onClick={handleClose} className={classes.signin} color="primary" variant="contained" disabled={hasError() || !isTouched()}>
+        SIGN IN
+      </Button>
+    </Container>
+  );
 };
-export default withStyles(Design)(Login);
+
+export default Login;

@@ -1,56 +1,47 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable no-console */
 import React from 'react';
-import { Button } from '@material-ui/core';
-import { AddDialog } from './components';
+import Button from '@material-ui/core/Button';
+import { AddDialog } from './components/AddDialog';
 import { NavBar } from '../components';
 
 class Trainee extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = {
       open: false,
     };
   }
 
-         handleClickOpen = () => {
-           this.setState({ open: true });
-         };
+  handleClickOpen = () => {
+    this.setState({ open: true });
+  };
 
-         handleClose = () => {
-           const { open } = this.state;
-           this.setState({ open: false });
-           return open;
-         };
+  handleClose = () => {
+    this.setState({ open: false });
+  };
 
-          handleSubmit = (data) => {
-            this.setState({
-              open: false,
-            }, () => {
-              // eslint-disable-next-line no-console
-              console.log(data);
-            });
-          }
+  handleSubmit = (data) => {
+    this.setState({ open: false });
+    console.log(data);
+  }
 
-          render() {
-            const { open } = this.state;
-            return (
-              <>
-                <NavBar />
-                <br />
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={this.handleClickOpen}
-                >
-                  <b>ADD TRAINEE</b>
-                </Button>
-                <AddDialog
-                  open={open}
-                  onClose={this.handleClose}
-                  onSubmit={() => this.handleSubmit}
-                />
-              </>
-            );
-          }
+  render() {
+    const { open } = this.state;
+    return (
+      <>
+        <NavBar />
+        <br />
+        <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
+          Add Trainee
+        </Button>
+        <AddDialog
+          open={open}
+          onClose={this.handleClose}
+          onSubmit={this.handleSubmit}
+        />
+      </>
+    );
+  }
 }
 export default Trainee;
