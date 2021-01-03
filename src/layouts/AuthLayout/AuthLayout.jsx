@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from '../components/index';
@@ -7,13 +6,13 @@ import { Footer } from '../components/index';
 const AuthLayout = ({ children, ...rest }) => (
   <div>
     <div>{children}</div>
-    &nbsp;
-    &nbsp;
+&nbsp;
+&nbsp;
     <Footer />
   </div>
 );
 AuthLayout.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
+// eslint-disable-next-line react/forbid-prop-types
   children: PropTypes.object.isRequired,
 };
 
