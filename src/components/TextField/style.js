@@ -1,8 +1,8 @@
 import styled, { css } from 'styled-components';
 
 const Div = styled.div`
-padding: 20px;
-border: 0.1px solid black;
+margin: 1px;
+border: 1px solid black;
 `;
 const Error = styled.p`
 color: red;

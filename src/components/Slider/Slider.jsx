@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/named */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { PUBLIC_IMAGE_FOLDER, DEFAULT_BANNER_IMAGE, total } from '../../config/constants';
@@ -30,8 +30,9 @@ class Slider extends Component {
     render() {
       const { current } = this.state;
       const {
-        altText, height, duration, banner, defaultBanner,
+        altText, height, duration, banner,
       } = this.props;
+      const { defaultBanner } = this.props;
       if (current === -1 || banner.length === 0) {
         return (
           <>
