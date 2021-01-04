@@ -31,7 +31,7 @@ class Trainee extends React.Component {
     return (
       <>
         <NavBar />
-        <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
+        <Button variant="outlined" color="primary" onClick={this.handleClickOpen} style={{ marginTop: '13px' }}>
           Add Trainee
         </Button>
         <AddDialog
