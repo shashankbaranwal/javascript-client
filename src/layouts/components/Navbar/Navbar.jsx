@@ -11,16 +11,17 @@ import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    marginBottom: theme.spacing(3),
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(4),
   },
   title: {
     flexGrow: 1,
   },
 }));
 
-function NavBar() {
+const NavBar = () => {
   const classes = useStyles();
 
   return (
@@ -40,5 +41,5 @@ function NavBar() {
       </AppBar>
     </div>
   );
-}
+};
 export default NavBar;
