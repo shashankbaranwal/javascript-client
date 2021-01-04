@@ -7,7 +7,6 @@ import { NavBar } from '../components/index';
 const PrivateLayout = ({ children, ...rest }) => (
   <div>
     <NavBar />
-    <br />
     <div>{children}</div>
     &nbsp;
   </div>

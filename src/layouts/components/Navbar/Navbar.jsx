@@ -35,7 +35,7 @@ function NavBar() {
           <Button component={Link} to="/TextFieldDemo" color="inherit">TEXTFIELD DEMO</Button>
           <Button component={Link} to="/InputDemo" color="inherit">INPUT DEMO</Button>
           <Button component={Link} to="/ChildrenDemo" color="inherit">CHILDREN DEMO</Button>
-          <Button color="inherit" style={{ marginLeft: 30 }}>LOGOUT</Button>
+          <Button color="inherit" style={{ marginLeft: 7 }}>LOGOUT</Button>
         </Toolbar>
       </AppBar>
     </div>
