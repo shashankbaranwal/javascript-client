@@ -9,7 +9,7 @@ const Footer = () => (
 
         <Link color="inherit" href="https://successive.tech/">
           <p>
-            {' © '}
+            &copy;
             {' '}
             Successive Technologies
           </p>

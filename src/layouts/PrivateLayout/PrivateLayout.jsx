@@ -8,7 +8,6 @@ const PrivateLayout = ({ children, ...rest }) => (
   <div>
     <NavBar />
     <div>{children}</div>
-    &nbsp;
   </div>
 );
 PrivateLayout.propTypes = {

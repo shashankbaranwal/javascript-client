@@ -1,3 +1,4 @@
+/* eslint-disable react/style-prop-object */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from '../components/index';
@@ -5,9 +6,9 @@ import { Footer } from '../components/index';
 // eslint-disable-next-line no-unused-vars
 const AuthLayout = ({ children, ...rest }) => (
   <div>
-    <div>{children}</div>
-&nbsp;
-&nbsp;
+    <div>
+      {children}
+    </div>
     <Footer />
   </div>
 );
