@@ -31,7 +31,6 @@ class Trainee extends React.Component {
     return (
       <>
         <NavBar />
-        <br />
         <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
           Add Trainee
         </Button>
