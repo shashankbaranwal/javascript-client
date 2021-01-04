@@ -14,14 +14,14 @@ class Slider extends Component {
     };
   }
 
-    componentDidMount = () => {
-      const { random, duration } = this.props;
-      let { current } = this.state;
-      this.id = setInterval(() => {
-        current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
-        this.setState({ current });
-      }, duration);
-    }
+  componentDidMount = () => {
+    const { random, duration } = this.props;
+    let { current } = this.state;
+    this.id = setInterval(() => {
+      current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
+      this.setState({ current });
+    }, duration);
+  }
 
     componentWillUnmount = () => {
       clearInterval(this.id);
