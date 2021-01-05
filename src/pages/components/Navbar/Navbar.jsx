@@ -14,7 +14,7 @@ const style = () => ({
   },
 });
 
-function NavBar(props) {
+const NavBar = (props) => {
   const { classes } = props;
   return (
     <>
@@ -33,7 +33,7 @@ function NavBar(props) {
       </AppBar>
     </>
   );
-}
+};
 NavBar.propTypes = {
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
