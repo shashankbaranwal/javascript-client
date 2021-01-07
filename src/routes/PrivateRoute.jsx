@@ -27,7 +27,6 @@ class PrivateRoute extends Component {
     return <Redirect to="/login" />;
   }
 }
-
 PrivateRoute.propTypes = {
   component: PropTypes.oneOfType([
     PropTypes.func,

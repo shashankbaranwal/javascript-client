@@ -27,7 +27,6 @@ class AuthRoute extends Component {
     return <Redirect to="/trainee" />;
   }
 }
-
 AuthRoute.propTypes = {
   component: PropTypes.oneOfType([
     PropTypes.func,

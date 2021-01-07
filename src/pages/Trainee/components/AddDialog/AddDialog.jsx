@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/sort-comp */
 import React from 'react';
 import Button from '@material-ui/core/Button';

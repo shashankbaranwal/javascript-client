@@ -9,5 +9,4 @@ const callApi = async (route, method, body) => {
   });
   return response;
 };
-
 export default callApi;
