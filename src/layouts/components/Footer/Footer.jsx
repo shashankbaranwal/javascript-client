@@ -1,13 +1,22 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography, Link } from '@material-ui/core';
 
 const Footer = () => (
   <>
-    <Box mt={2}>
-      <Typography variant="body2" color="black" align="center">
-        {' © '}
-        Successive Technology
+    <Box mt={6}>
+      <Typography variant="body2" color="textSecondary" align="center">
+
+        <Link color="inherit" href="https://successive.tech/">
+          <p>
+            &copy;
+            {' '}
+            Successive Technologies
+          </p>
+        </Link>
+        {' '}
+        {new Date().getFullYear()}
+        {'.'}
       </Typography>
     </Box>
   </>
