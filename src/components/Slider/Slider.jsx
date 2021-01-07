@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/named */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { PUBLIC_IMAGE_FOLDER, DEFAULT_BANNER_IMAGE, total } from '../../config/constants';
@@ -14,14 +14,14 @@ class Slider extends Component {
     };
   }
 
-    componentDidMount = () => {
-      const { random, duration } = this.props;
-      let { current } = this.state;
-      this.id = setInterval(() => {
-        current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
-        this.setState({ current });
-      }, duration);
-    }
+  componentDidMount = () => {
+    const { random, duration } = this.props;
+    let { current } = this.state;
+    this.id = setInterval(() => {
+      current = (random) ? getRandomNumber(total) : getNextRoundRobin(current, total);
+      this.setState({ current });
+    }, duration);
+  }
 
     componentWillUnmount = () => {
       clearInterval(this.id);
