@@ -1,4 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable import/named */
 import React from 'react';
 import { TextField, Slider } from '../../components';
 import { Div } from '../../components/TextField/style';
