@@ -272,8 +272,5 @@ class AddDialog extends React.Component {
     );
   }
 }
-// AddDialog.propTypes = {
-//   history: PropTypes.objectOf(PropTypes.any).isRequired,
-// };
 
 export default AddDialog;

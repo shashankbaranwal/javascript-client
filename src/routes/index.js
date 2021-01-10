@@ -1,4 +1,2 @@
-import AuthRoute from './AuthRoute';
-import PrivateRoute from './PrivateRoute';
-
-export { AuthRoute, PrivateRoute };
+export { default as AuthRoute } from './AuthRoute';
+export { default as PrivateRoute } from './PrivateRoute';

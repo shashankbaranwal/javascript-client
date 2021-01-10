@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/sort-comp */
 import React from 'react';
 import Avatar from '@material-ui/core/Avatar';
