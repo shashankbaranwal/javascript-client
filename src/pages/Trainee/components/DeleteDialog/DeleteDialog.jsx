@@ -8,7 +8,9 @@ import {
   DialogTitle,
   Button,
 } from '@material-ui/core';
+
 import { SnackBarContext } from '../../../../contexts';
+import callApi from '../../../../libs/utils/api';
 
 class DeleteDialog extends Component {
   constructor(props) {
@@ -16,18 +18,25 @@ class DeleteDialog extends Component {
     this.state = {};
   }
 
-  handleDeleteClose = (event, value) => {
+  handleDeleteClose = async (event, value) => {
     event.preventDefault();
-    const { details, onClose } = this.props;
+    const { details, onClose, renderTrainee } = this.props;
     const originalDate = new Date(details.createdAt);
     const dateCheck = new Date('2019-02-14');
-    if (originalDate > dateCheck) {
-      // eslint-disable-next-line no-console
-      console.log('Deleted Item', details);
-      value('Successfully Deleted!', 'success');
-    } else {
-      value("Can't Delete!", 'error');
-    }
+    const { originalId } = details;
+    await callApi('/trainee', 'DELETE', { originalId })
+      .then(() => {
+        if (originalDate > dateCheck) {
+          console.log('Deleted Item', details);
+          value('Successfully Deleted!', 'success');
+          renderTrainee();
+        } else {
+          value("Can't Delete!", 'error');
+        }
+      })
+      .catch(() => {
+        value('Error, Can not Delete!', 'error');
+      });
     onClose();
   };
 
@@ -66,6 +75,7 @@ DeleteDialog.propTypes = {
   details: PropTypes.objectOf(PropTypes.any).isRequired,
   onClose: PropTypes.func,
   deleteOpen: PropTypes.bool,
+  renderTrainee: PropTypes.func.isRequired,
 };
 
 DeleteDialog.defaultProps = {

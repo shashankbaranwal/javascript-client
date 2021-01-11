@@ -1,13 +1,13 @@
-/* eslint-disable max-len */
-/* eslint-disable react/no-unused-prop-types */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-console */
+/* eslint-disable max-len */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { AddDialog, EditDialog, DeleteDialog } from './components';
-import trainees from './data/trainee';
 import { TableComponent } from '../../components/index';
 import { getFormattedDate } from '../../libs/utils/getFormattedDate';
 import callApi from '../../libs/utils/api';
@@ -20,17 +20,17 @@ class TraineeList extends Component {
     super();
     this.state = {
       open: false,
+      sortedBy: 'createdAt',
       order: dsend,
-      sortedOrder: 1,
-      sortedBy: 'name' && 'email',
+      sortedOrder: -1,
       page: 0,
-      totalCount: 0,
       edit: false,
       deleteDialog: false,
       skip: 0,
-      limit: 20,
+      limit: 10,
       traineeInfo: {},
       database: [],
+      loader: false,
     };
   }
 
@@ -81,15 +81,25 @@ class TraineeList extends Component {
 
   handleSort = (field) => {
     const { order, sortedBy } = this.state;
-    let tabOrder = asend;
+    let tabOrder = asend; let
+      sequence = -1;
     if (sortedBy === field && order === asend) {
       tabOrder = dsend;
+      sequence = 1;
     }
-    this.setState({ sortedBy: field, order: tabOrder });
+    this.setState({ sortedBy: field, order: tabOrder, sortedOrder: sequence });
   }
 
-  handlePageChange = (event, page) => {
-    this.setState({ page });
+  handlePageChange = (newPage, value) => {
+    console.log('New Page ', newPage, 'Value ', value);
+    this.setState({ page: value, skip: value * 20 }, () => {
+      this.renderData();
+      console.log('Skip ', this.state.skip);
+    });
+  }
+
+  handleSubmit = () => {
+    this.setState({ open: false });
   }
 
   handleSelect = (id) => {
@@ -97,10 +107,6 @@ class TraineeList extends Component {
     return (
       history.push(`${match.path}/${id}`)
     );
-  }
-
-  handleSubmit = () => {
-    this.setState({ open: false });
   }
 
   renderData = async () => {
@@ -112,7 +118,7 @@ class TraineeList extends Component {
       .then((response) => {
         setTimeout(() => {
           setLoading(false);
-          this.setState({ database: response.data.data[0], totalCount: response.data.TraineeCount + 1 });
+          this.setState({ database: response.data.data[0] });
         }, 500);
         console.log(response);
       })
@@ -124,7 +130,7 @@ class TraineeList extends Component {
 
   render() {
     const {
-      open, deleteDialog, order, sortedBy, page, edit, database, loading, totalCount, orderBy,
+      open, deleteDialog, order, sortedBy, page, edit, database, loader, traineeInfo, limit,
     } = this.state;
     return (
       <>
@@ -133,11 +139,12 @@ class TraineeList extends Component {
             open={open}
             onClose={this.onCloseEvent}
             onSubmit={this.handleSubmit}
+            renderTrainee={this.renderData}
           />
         </div>
         {
-          loading ? (
-            <CircularProgress size={50} color="secondary" style={{ marginLeft: '50%', Center: '20%' }} />
+          loader ? (
+            <CircularProgress size={150} color="secondary" style={{ marginLeft: '43%', marginTop: '20%' }} />
           )
             : (
               <TableComponent
@@ -172,12 +179,12 @@ class TraineeList extends Component {
                 ]}
                 sortedBy={sortedBy}
                 order={order}
-                orderBy={orderBy}
                 onSort={this.handleSort}
-                onSelect={this.handleSelect}
-                count={totalCount}
+                count={50}
                 page={page}
+                rowsPerPage={limit}
                 onPageChange={this.handlePageChange}
+                onSelect={this.handleSelect}
               />
             )
         }
@@ -186,14 +193,16 @@ class TraineeList extends Component {
             <EditDialog
               editOpen={edit}
               onClose={this.editDialogClose}
-              details={trainees}
+              details={traineeInfo}
+              renderTrainee={this.renderData}
             />
           )}
           { deleteDialog && (
             <DeleteDialog
               deleteOpen={deleteDialog}
               onClose={this.deleteDialogClose}
-              details={trainees}
+              details={traineeInfo}
+              renderTrainee={this.renderData}
             />
           )}
         </>
@@ -206,4 +215,4 @@ TraineeList.propTypes = {
   history: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
 };
-export default (IsLoadingHOC(TraineeList));
+export default IsLoadingHOC(TraineeList);

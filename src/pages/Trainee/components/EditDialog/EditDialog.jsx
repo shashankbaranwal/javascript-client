@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import * as yup from 'yup';
@@ -14,6 +15,7 @@ import {
 
 import { Email, Person } from '@material-ui/icons';
 import { SnackBarContext } from '../../../../contexts';
+import callApi from '../../../../libs/utils/api';
 
 class EditDialog extends Component {
   schema = yup.object().shape({
@@ -24,8 +26,8 @@ class EditDialog extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      email: '',
+      name: this.props.details.name,
+      email: this.props.details.email,
       touched: {
         name: false,
         email: false,
@@ -34,36 +36,14 @@ class EditDialog extends Component {
   }
 
   handleNameValue = (event) => {
-    const { details } = this.props;
-    const { email, touched } = this.state;
-    if (email === '') {
-      this.setState({
-        email: details.email,
-      });
-    }
-    this.setState({
-      name: event.target.value,
-      touched: {
-        ...touched,
-        name: true,
-      },
+    this.setState({ name: event.target.value }, () => {
+      console.log(this.state);
     });
   };
 
   handleEmailValue = (event) => {
-    const { details } = this.props;
-    const { name, touched } = this.state;
-    if (name === '') {
-      this.setState({
-        name: details.name,
-      });
-    }
-    this.setState({
-      email: event.target.value,
-      touched: {
-        ...touched,
-        email: true,
-      },
+    this.setState({ email: event.target.value }, () => {
+      console.log(this.state);
     });
   };
 
@@ -131,11 +111,22 @@ class EditDialog extends Component {
     });
   };
 
-  onSubmit = (event, value) => {
-    const { onClose } = this.props;
-    this.onConsole();
-    value('Successfully Edited!', 'success');
-    onClose();
+  onSubmit = async (e, value) => {
+    e.preventDefault();
+    const { onClose, details, renderTrainee } = this.props;
+    const { name, email } = this.state;
+    const { originalId } = details;
+    await callApi('/trainee', 'PUT', { originalId, name, email })
+      .then(() => {
+        this.onConsole();
+        value('Successfully Edited!', 'success');
+        renderTrainee();
+        onClose();
+      })
+      .catch(() => {
+        value('Date Invalid', 'error');
+        onClose();
+      });
   };
 
   render() {
@@ -149,9 +140,9 @@ class EditDialog extends Component {
               <DialogContentText>Enter your trainee details</DialogContentText>
               <TextField
                 label="Name"
-                variant="outlined"
                 defaultValue={details.name}
                 margin="normal"
+                variant="outlined"
                 onChange={this.handleNameValue}
                 onBlur={() => this.isTouched('name')}
                 helperText={this.getError('name')}
@@ -170,9 +161,9 @@ class EditDialog extends Component {
               />
               <TextField
                 label="Email Address"
-                variant="outlined"
                 defaultValue={details.email}
                 margin="normal"
+                variant="outlined"
                 onChange={this.handleEmailValue}
                 onBlur={() => this.isTouched('email')}
                 helperText={this.getError('email')}
@@ -214,6 +205,8 @@ EditDialog.propTypes = {
   details: PropTypes.objectOf(PropTypes.any).isRequired,
   onClose: PropTypes.func,
   editOpen: PropTypes.bool,
+  // history: PropTypes.objectOf(PropTypes.any).isRequired,
+  renderTrainee: PropTypes.func.isRequired,
 };
 
 EditDialog.defaultProps = {

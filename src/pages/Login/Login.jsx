@@ -82,7 +82,7 @@ class Login extends React.Component {
         this.setState({
           email: '',
           password: '',
-          loading: false,
+          loading: true,
           touched: {
             email: false,
             password: false,
