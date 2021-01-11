@@ -6,11 +6,7 @@ package-lock.json
 /.pnp
 .pnp.js
 .vscode
-<<<<<<< HEAD
-
-=======
 /.eslintcache
->>>>>>> be70d99c4d3a506179b79b264733ee95bffb5641
 
 # testing
 /coverage
