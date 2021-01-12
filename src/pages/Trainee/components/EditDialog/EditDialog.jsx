@@ -37,13 +37,11 @@ class EditDialog extends Component {
 
   handleNameValue = (event) => {
     this.setState({ name: event.target.value }, () => {
-      console.log(this.state);
     });
   };
 
   handleEmailValue = (event) => {
     this.setState({ email: event.target.value }, () => {
-      console.log(this.state);
     });
   };
 
