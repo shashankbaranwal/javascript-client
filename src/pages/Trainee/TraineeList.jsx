@@ -23,8 +23,8 @@ class TraineeList extends React.Component {
       open: false,
       orderBy: '',
       order: 'asc',
-      EditOpen: false,
-      RemoveOpen: false,
+      openEditDialog: false,
+      openRemoveDialog: false,
       editData: {},
       deleteData: {},
       page: 0,
@@ -75,21 +75,21 @@ class TraineeList extends React.Component {
   // eslint-disable-next-line no-unused-vars
   handleRemoveDialogOpen = (element) => (event) => {
     this.setState({
-      RemoveOpen: true,
+      openRemoveDialog: true,
       deleteData: element,
     });
   };
 
   handleRemoveClose = () => {
     this.setState({
-      RemoveOpen: false,
+      openRemoveDialog: false,
     });
   };
 
   handleRemove = () => {
     const { deleteData } = this.state;
     this.setState({
-      RemoveOpen: false,
+      openRemoveDialog: false,
     });
     // eslint-disable-next-line no-console
     console.log('Deleted Item ', deleteData);
@@ -98,20 +98,20 @@ class TraineeList extends React.Component {
   // eslint-disable-next-line no-unused-vars
   handleEditDialogOpen = (element) => (event) => {
     this.setState({
-      EditOpen: true,
+      openEditDialog: true,
       editData: element,
     });
   };
 
   handleEditClose = () => {
     this.setState({
-      EditOpen: false,
+      openEditDialog: false,
     });
   };
 
   handleEdit = (name, email) => {
     this.setState({
-      EditOpen: false,
+      openEditDialog: false,
     });
     // eslint-disable-next-line no-console
     console.log('Edited Item ', { name, email });
@@ -119,7 +119,7 @@ class TraineeList extends React.Component {
 
   render() {
     const {
-      open, order, orderBy, page, rowsPerPage, EditOpen, RemoveOpen, editData,
+      open, order, orderBy, page, rowsPerPage, openEditDialog, openRemoveDialog, editData,
     } = this.state;
     const { classes } = this.props;
     return (
@@ -134,14 +134,14 @@ class TraineeList extends React.Component {
           &nbsp;
           &nbsp;
           <EditDialog
-            Editopen={EditOpen}
+            openEditDialog={openEditDialog}
             handleEditClose={this.handleEditClose}
             handleEdit={this.handleEdit}
             data={editData}
           />
           <br />
           <DeleteDialog
-            openRemove={RemoveOpen}
+            openRemove={openRemoveDialog}
             onClose={this.handleRemoveClose}
             remove={this.handleRemove}
           />
