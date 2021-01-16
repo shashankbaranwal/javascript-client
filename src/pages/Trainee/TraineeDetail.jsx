@@ -6,7 +6,7 @@ import {
   withStyles, Card, CardContent, Typography, CardMedia, Button,
 } from '@material-ui/core';
 import trainees from './data/trainee';
-import NotFound from '../NoMatch/index';
+import { NotFound } from '../NoMatch';
 
 const style = (theme) => ({
   root: {

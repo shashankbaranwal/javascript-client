@@ -11,9 +11,10 @@ import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    marginBottom: theme.spacing(3),
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(4),
   },
   title: {
     flexGrow: 1,
@@ -39,6 +40,7 @@ const NavBar = () => {
           <Button component={Link} to="/TextFieldDemo" color="inherit">TEXTFIELD DEMO</Button>
           <Button component={Link} to="/InputDemo" color="inherit">INPUT DEMO</Button>
           <Button component={Link} to="/ChildrenDemo" color="inherit">CHILDREN DEMO</Button>
+<<<<<<< HEAD
           <Button
             color="inherit"
             component={Link}
@@ -47,6 +49,9 @@ const NavBar = () => {
           >
             Logout
           </Button>
+=======
+          <Button color="inherit" style={{ marginLeft: 7 }}>LOGOUT</Button>
+>>>>>>> 72dc66a4b1b57191ada0e000e1ad4c95f6adf672
         </Toolbar>
       </AppBar>
     </div>
