@@ -36,11 +36,7 @@ const NavBar = () => {
           <Button component={Link} to="/TextFieldDemo" color="inherit">TEXTFIELD DEMO</Button>
           <Button component={Link} to="/InputDemo" color="inherit">INPUT DEMO</Button>
           <Button component={Link} to="/ChildrenDemo" color="inherit">CHILDREN DEMO</Button>
-<<<<<<< HEAD
           <Button color="inherit" style={{ marginLeft: 5 }}>LOGOUT</Button>
-=======
-          <Button color="inherit" style={{ marginLeft: 7 }}>LOGOUT</Button>
->>>>>>> be70d99c4d3a506179b79b264733ee95bffb5641
         </Toolbar>
       </AppBar>
     </div>
