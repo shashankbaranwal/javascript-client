@@ -1,36 +1,24 @@
-/* eslint-disable */
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import * as yup from 'yup';
 import {
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Button,
+  TextField,
   InputAdornment,
 } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import EmailIcon from '@material-ui/icons/Email';
-import PersonIcon from '@material-ui/icons/Person';
 
-const useStyles = () => ({
-  button_color: {
-    backgroundColor: 'blue',
-    color: 'black',
-  },
-  button_error: {
-    backgroundColor: '#bbb9b9',
-  },
-});
+import { Email, Person } from '@material-ui/icons';
+import { SnackBarContext } from '../../../../contexts';
 
-class EditDialog extends React.Component {
+class EditDialog extends Component {
   schema = yup.object().shape({
-    name: yup.string().required('Name is required').min(3),
-    email: yup.string().email().required('Email is required'),
+    name: yup.string().required().min(3).label('Name'),
+    email: yup.string().email().required().label('Email'),
   });
 
   constructor(props) {
@@ -38,158 +26,199 @@ class EditDialog extends React.Component {
     this.state = {
       name: '',
       email: '',
-      error: {
-        name: '',
-        email: '',
+      touched: {
+        name: false,
+        email: false,
       },
     };
   }
 
-  handleSet = () => {
-    const { data } = this.props;
-    this.setState({
-      name: data.name,
-      email: data.email,
-    });
-  };
-
-  handleOnChange = (prop) => (event) => {
-    this.setState({
-      [prop]: event.target.value,
-    });
-  };
-
-  // eslint-disable-next-line consistent-return
-  getError = (field) => {
-    const { error } = this.state;
-    this.schema
-      .validateAt(field, this.state)
-      .then(() => {
-        if (error[field] !== '') {
-          this.setState({
-            error: {
-              ...error,
-              [field]: '',
-            },
-          });
-        }
-      })
-      .catch((err) => {
-        if (err.message !== error[field]) {
-          this.setState({
-            error: {
-              ...error,
-              [field]: err.message,
-            },
-          });
-        }
+  handleNameValue = (event) => {
+    const { details } = this.props;
+    const { email, touched } = this.state;
+    if (email === '') {
+      this.setState({
+        email: details.email,
       });
-    return error[field];
+    }
+    this.setState({
+      name: event.target.value,
+      touched: {
+        ...touched,
+        name: true,
+      },
+    });
+  };
+
+  handleEmailValue = (event) => {
+    const { details } = this.props;
+    const { name, touched } = this.state;
+    if (name === '') {
+      this.setState({
+        name: details.name,
+      });
+    }
+    this.setState({
+      email: event.target.value,
+      touched: {
+        ...touched,
+        email: true,
+      },
+    });
+  };
+
+  getError = (field) => {
+    const { touched } = this.state;
+    if (touched[field] && this.hasErrors()) {
+      try {
+        this.schema.validateSyncAt(field, this.state);
+      } catch (err) {
+        return err.message;
+      }
+    }
+    return '';
   };
 
   hasErrors = () => {
-    const { error } = this.state;
-    let iserror = Object.values(error);
-    iserror = iserror.filter((errorMessage) => errorMessage !== '');
-    return !!iserror.length;
+    const { state } = this;
+    try {
+      this.schema.validateSync(state);
+    } catch (err) {
+      return true;
+    }
+    return false;
+  };
+
+  handleButtonError = () => {
+    if (this.hasErrors()) {
+      return false;
+    }
+    return true;
+  };
+
+  isTouched = (field) => {
+    const { touched } = this.state;
+    this.setState({
+      touched: {
+        ...touched,
+        [field]: true,
+      },
+    });
+  };
+
+  isValid = (item) => {
+    const { state } = this;
+    const { touched } = state;
+
+    if (touched[[item]] === false) {
+      return false;
+    }
+    return this.hasErrors();
+  };
+
+  onConsole = () => {
+    const { name, email } = this.state;
+    // eslint-disable-next-line no-console
+    console.log('Edited Item', { name, email });
+    this.setState({
+      buttonEnable: false,
+      name: '',
+      email: '',
+      touched: {
+        name: false,
+        email: false,
+      },
+    });
+  };
+
+  onSubmit = (event, value) => {
+    const { onClose } = this.props;
+    this.onConsole();
+    value('Successfully Edited!', 'success');
+    onClose();
   };
 
   render() {
-    const {
-      Editopen, handleEditClose, handleEdit, data, classes,
-    } = this.props;
-    const { name, email, error } = this.state;
+    const { editOpen, onClose, details } = this.props;
     return (
-      <div>
-        <Dialog
-          open={Editopen}
-          onClose={handleEditClose}
-          onMouseEnter={this.handleSet}
-          variant="outlined"
-          color="primary"
-          aria-labelledby="form-dialog-title"
-        >
-          <DialogTitle id="form-dialog-title">Edit Trainee</DialogTitle>
-          <DialogContent>
-            <DialogContentText>Edit your trainee details</DialogContentText>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  autoFocus
-                  error={!!error.name}
-                  id="name"
-                  type="text"
-                  variant="outlined"
-                  style={{ width: '100%' }}
-                  margin="dense"
-                  defaultValue={data.name}
-                  helperText={this.getError('name')}
-                  onChange={this.handleOnChange('name')}
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <br />
-              <br />
-              <Grid item xs={12}>
-                <TextField
-                  error={!!error.email}
-                  id="email"
-                  type="email"
-                  variant="outlined"
-                  style={{ width: '100%' }}
-                  margin="dense"
-                  defaultValue={data.email}
-                  helperText={this.getError('email')}
-                  onChange={this.handleOnChange('email')}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                  fullWidth
-                />
-              </Grid>
-            </Grid>
-            <br />
-            <br />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleEditClose} color="primary">
-              Cancel
-            </Button>
-            <Button
-              onClick={() => handleEdit(name, email)}
-              className={
-                (name === data.name && email === data.email) || this.hasErrors()
-                  ? classes.button_error
-                  : classes.button_color
-              }
-              color="primary"
-              disabled={
-                !!((name === data.name && email === data.email) || this.hasErrors())
-              }
-            >
-              Submit
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+      <SnackBarContext.Consumer>
+        {(value) => (
+          <Dialog open={editOpen} onClose={this.handleClose}>
+            <DialogTitle>Edit Trainee</DialogTitle>
+            <DialogContent>
+              <DialogContentText>Enter your trainee details</DialogContentText>
+              <TextField
+                label="Name"
+                variant="outlined"
+                defaultValue={details.name}
+                margin="normal"
+                onChange={this.handleNameValue}
+                onBlur={() => this.isTouched('name')}
+                helperText={this.getError('name')}
+                error={this.isValid('name')}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                label="Email Address"
+                variant="outlined"
+                defaultValue={details.email}
+                margin="normal"
+                onChange={this.handleEmailValue}
+                onBlur={() => this.isTouched('email')}
+                helperText={this.getError('email')}
+                error={this.isValid('email')}
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={(event) => this.onSubmit(event, value)}
+                disabled={!this.handleButtonError()}
+              >
+                Submit
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+      </SnackBarContext.Consumer>
     );
   }
 }
+
 EditDialog.propTypes = {
-  Editopen: PropTypes.bool.isRequired,
-  handleEditClose: PropTypes.func.isRequired,
-  handleEdit: PropTypes.func.isRequired,
-  classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  details: PropTypes.objectOf(PropTypes.any).isRequired,
+  onClose: PropTypes.func,
+  editOpen: PropTypes.bool,
 };
-export default withStyles(useStyles)(EditDialog);
+
+EditDialog.defaultProps = {
+  onClose: () => { },
+  editOpen: false,
+};
+
+export default EditDialog;

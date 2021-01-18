@@ -1,2 +1,2 @@
-export { NavBar } from './Navbar';
+export { NavBar } from './Navbar/index';
 export { Footer } from './Footer';

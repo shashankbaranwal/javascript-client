@@ -1,200 +1,158 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Button, withStyles } from '@material-ui/core';
+/* eslint-disable no-console */
+import React, { Component } from 'react';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { AddDialog, EditDialog, DeleteDialog } from './components/index';
-import { TableComponent } from '../../components';
+import { AddDialog, EditDialog, DeleteDialog } from './components';
 import trainees from './data/trainee';
+import { TableComponent } from '../../components/index';
+import { getFormattedDate } from '../../libs/utils/getFormattedDate';
 
-const useStyles = (theme) => ({
-  root: {
-    margin: theme.spacing(2),
-  },
-  dialog: {
-    textAlign: 'right',
-  },
-});
-
-class TraineeList extends React.Component {
-  constructor(props) {
-    super(props);
+const asend = 'asc';
+const dsend = 'desc';
+class TraineeList extends Component {
+  constructor() {
+    super();
     this.state = {
       open: false,
       orderBy: '',
-      order: 'asc',
-      openEditDialog: false,
-      openRemoveDialog: false,
-      editData: {},
-      deleteData: {},
+      order: asend,
       page: 0,
-      rowsPerPage: 10,
+      edit: false,
+      deleteDialog: false,
+      traineeInfo: {},
     };
   }
 
-  handleClickOpen = () => {
+  onOpen = () => {
     this.setState({ open: true });
   };
 
-  handleClose = () => {
-    const { open } = this.state;
+  onCloseEvent = () => {
     this.setState({ open: false });
-    return open;
   };
 
-  handleSubmit = (data) => {
-    this.setState({
-      open: false,
-    }, () => {
-      // eslint-disable-next-line no-console
-      console.log('Data :', data);
-    });
+  editDialogOpen = (item) => {
+    this.selectedItem = item;
+    this.setState({ edit: true, traineeInfo: item });
+  };
+
+  editDialogClose = () => {
+    this.selectedIem = null;
+    this.setState({ edit: false });
+  };
+
+  handleEdit = (item) => {
+    console.log(item);
+    this.editDialogClose();
   }
 
-  handleSelect = (event) => {
-    // eslint-disable-next-line no-console
-    console.log(event);
+  deleteDialogOpen = (item) => {
+    this.selectedIem = item;
+    this.setState({ deleteDialog: true, traineeInfo: item });
   };
 
-  handleSort = (field) => (event) => {
-    const { order } = this.state;
-    // eslint-disable-next-line no-console
-    console.log(event);
-    this.setState({
-      orderBy: field,
-      order: order === 'asc' ? 'desc' : 'asc',
-    });
+  deleteDialogClose = () => {
+    this.selectedIem = null;
+    this.setState({ deleteDialog: false });
   };
 
-  handleChangePage = (event, newPage) => {
-    this.setState({
-      page: newPage,
-    });
-  };
+  handleDelete = () => {
+    const { traineeInfo } = this.state;
+    console.log(traineeInfo);
+    this.deleteDialogClose();
+  }
 
-  // eslint-disable-next-line no-unused-vars
-  handleRemoveDialogOpen = (element) => (event) => {
-    this.setState({
-      openRemoveDialog: true,
-      deleteData: element,
-    });
-  };
+  handleSort = (field) => {
+    const { order, orderBy } = this.state;
+    let tabOrder = asend;
+    if (orderBy === field && order === asend) {
+      tabOrder = dsend;
+    }
+    this.setState({ orderBy: field, order: tabOrder });
+  }
 
-  handleRemoveClose = () => {
-    this.setState({
-      openRemoveDialog: false,
-    });
-  };
+  handlePageChange = (event, page) => {
+    this.setState({ page });
+  }
 
-  handleRemove = () => {
-    const { deleteData } = this.state;
-    this.setState({
-      openRemoveDialog: false,
-    });
-    // eslint-disable-next-line no-console
-    console.log('Deleted Item ', deleteData);
-  };
-
-  // eslint-disable-next-line no-unused-vars
-  handleEditDialogOpen = (element) => (event) => {
-    this.setState({
-      openEditDialog: true,
-      editData: element,
-    });
-  };
-
-  handleEditClose = () => {
-    this.setState({
-      openEditDialog: false,
-    });
-  };
-
-  handleEdit = (name, email) => {
-    this.setState({
-      openEditDialog: false,
-    });
-    // eslint-disable-next-line no-console
-    console.log('Edited Item ', { name, email });
-  };
+  handleSubmit = () => {
+    this.setState({ open: false });
+  }
 
   render() {
     const {
-      open, order, orderBy, page, rowsPerPage, openEditDialog, openRemoveDialog, editData,
+      open,
+      deleteDialog,
+      order,
+      orderBy,
+      page,
+      edit,
     } = this.state;
-    const { classes } = this.props;
     return (
       <>
-        <div className={classes.root}>
-          <div className={classes.dialog}>
-            <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
-              ADD TRAINEELIST
-            </Button>
-            <AddDialog open={open} onClose={this.handleClose} onSubmit={() => this.handleSubmit} />
-          </div>
-          &nbsp;
-          &nbsp;
-          <EditDialog
-            openEditDialog={openEditDialog}
-            handleEditClose={this.handleEditClose}
-            handleEdit={this.handleEdit}
-            data={editData}
-          />
-          <br />
-          <DeleteDialog
-            openRemove={openRemoveDialog}
-            onClose={this.handleRemoveClose}
-            remove={this.handleRemove}
-          />
-          <br />
-          <br />
-          <TableComponent
-            id="id"
-            data={trainees}
-            column={
-              [
-                {
-                  field: 'name',
-                  label: 'Name',
-                },
-                {
-                  field: 'email',
-                  label: 'Email Address',
-                  format: (value) => value && value.toUpperCase(),
-                },
-                {
-                  field: 'createdAt',
-                  label: 'Date',
-                  align: 'right',
-                  format: this.getDateFormat,
-                },
-              ]
-            }
-            actions={[
-              {
-                icon: <EditIcon />,
-                handler: this.handleEditDialogOpen,
-
-              },
-              {
-                icon: <DeleteIcon />,
-                handler: this.handleRemoveDialogOpen,
-              },
-            ]}
-            onSort={this.handleSort}
-            orderBy={orderBy}
-            order={order}
-            onSelect={this.handleSelect}
-            count={100}
-            page={page}
-            onChangePage={this.handleChangePage}
-            rowsPerPage={rowsPerPage}
+        <div style={{ float: 'right' }}>
+          <AddDialog
+            open={open}
+            onClose={this.onCloseEvent}
+            onSubmit={this.handleSubmit}
           />
         </div>
+        <TableComponent
+          id="id"
+          data={trainees}
+          column={[
+            {
+              field: 'name',
+              label: 'Name',
+            },
+            {
+              field: 'email',
+              label: 'Email Address',
+              format: (value) => value && value.toUpperCase(),
+            },
+            {
+              field: 'createdAt',
+              label: 'Date',
+              align: 'right',
+              format: getFormattedDate,
+            },
+          ]}
+          actions={[
+            {
+              icon: <EditIcon />,
+              handler: this.editDialogOpen,
+            },
+            {
+              icon: <DeleteIcon />,
+              handler: this.deleteDialogOpen,
+            },
+          ]}
+          orderBy={orderBy}
+          order={order}
+          onSort={this.handleSort}
+          count={100}
+          page={page}
+          onPageChange={this.handlePageChange}
+        />
+        <>
+          { edit && (
+            <EditDialog
+              editOpen={edit}
+              onClose={this.editDialogClose}
+              details={trainees}
+            />
+          )}
+          { deleteDialog && (
+            <DeleteDialog
+              deleteOpen={deleteDialog}
+              onClose={this.deleteDialogClose}
+              details={trainees}
+            />
+          )}
+        </>
       </>
     );
   }
 }
-TraineeList.propTypes = {
-  classes: PropTypes.objectOf(PropTypes.string).isRequired,
-};
-export default withStyles(useStyles)(TraineeList);
+
+export default TraineeList;
