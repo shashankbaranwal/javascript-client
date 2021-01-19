@@ -24,6 +24,10 @@ const useStyles = makeStyles((theme) => ({
 const NavBar = () => {
   const classes = useStyles();
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+  };
+
   return (
     <div className={classes.root} style={{ margin: 0 }}>
       <CssBaseline />
@@ -36,7 +40,14 @@ const NavBar = () => {
           <Button component={Link} to="/TextFieldDemo" color="inherit">TEXTFIELD DEMO</Button>
           <Button component={Link} to="/InputDemo" color="inherit">INPUT DEMO</Button>
           <Button component={Link} to="/ChildrenDemo" color="inherit">CHILDREN DEMO</Button>
-          <Button color="inherit" style={{ marginLeft: 5 }}>LOGOUT</Button>
+          <Button
+            color="inherit"
+            component={Link}
+            to="/login"
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
     </div>
