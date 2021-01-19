@@ -5,7 +5,7 @@ import { Snackbar } from '@material-ui/core';
 
 export const SnackBarContext = createContext(() => { });
 
-function CustomizedSnackbars(props) {
+const CustomizedSnackbars = (props) => {
   const {
     onClose, open, message, status,
   } = props;
@@ -24,7 +24,7 @@ function CustomizedSnackbars(props) {
       </Snackbar>
     </div>
   );
-}
+};
 
 CustomizedSnackbars.propTypes = {
   message: PropTypes.string.isRequired,
