@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { NavBar } from '../components/Navbar/index';
+import { NavBar } from '../components/Navbar';
 
 // eslint-disable-next-line no-unused-vars
 const PrivateLayout = ({ children, ...rest }) => (
