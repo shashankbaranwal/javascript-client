@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/sort-comp */
 import React from 'react';
 import Avatar from '@material-ui/core/Avatar';
@@ -13,7 +12,6 @@ import { Email } from '@material-ui/icons';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import * as yup from 'yup';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 import PropTypes from 'prop-types';
 import { SnackBarContext } from '../../contexts';
 import callApi from '../../libs/utils/api';
