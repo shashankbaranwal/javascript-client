@@ -1,7 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-console */
-/* eslint-disable max-len */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import EditIcon from '@material-ui/icons/Edit';
@@ -94,7 +90,7 @@ class TraineeList extends Component {
     console.log('New Page ', newPage, 'Value ', value);
     this.setState({ page: value, skip: value * 20 }, () => {
       this.renderData();
-      console.log('Skip ', this.state.skip);
+      console.log('Skip ', this.skip);
     });
   }
 

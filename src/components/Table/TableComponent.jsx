@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/require-default-props */
 import React from 'react';
 import {
   Button,
@@ -92,18 +90,15 @@ TableComponent.propTypes = {
   data: PropTypes.arrayOf(Object).isRequired,
   order: PropTypes.string,
   orderBy: PropTypes.string,
-  onSort: PropTypes.func,
   onPageChange: PropTypes.func,
   rowsPerPage: PropTypes.number,
   count: PropTypes.number,
   page: PropTypes.number,
   actions: PropTypes.arrayOf(PropTypes.any),
-  onSelect: PropTypes.func,
 };
 TableComponent.defaultProps = {
   order: '',
   orderBy: '',
-  onSort: () => {},
   onPageChange: () => {},
   rowsPerPage: 10,
   count: 0,

@@ -18,7 +18,7 @@ class DeleteDialog extends Component {
     this.state = {};
   }
 
-  handleDeleteClose = async (event, value) => {
+  handleDeleteClose = async (event, message) => {
     event.preventDefault();
     const { details, onClose, renderTrainee } = this.props;
     const originalDate = new Date(details.createdAt);
@@ -28,14 +28,14 @@ class DeleteDialog extends Component {
       .then(() => {
         if (originalDate > dateCheck) {
           console.log('Deleted Item', details);
-          value('Successfully Deleted!', 'success');
+          message('Successfully Deleted!', 'success');
           renderTrainee();
         } else {
-          value("Can't Delete!", 'error');
+          message("Can't Delete!", 'error');
         }
       })
       .catch(() => {
-        value('Error, Can not Delete!', 'error');
+        message('Error, Can not Delete!', 'error');
       });
     onClose();
   };
@@ -44,7 +44,7 @@ class DeleteDialog extends Component {
     const { deleteOpen, onClose } = this.props;
     return (
       <SnackBarContext.Consumer>
-        {(value) => (
+        {(message) => (
           <Dialog open={deleteOpen} onClose={onClose}>
             <DialogTitle>Remove Trainee</DialogTitle>
             <DialogContent>
@@ -57,7 +57,7 @@ class DeleteDialog extends Component {
                 Cancel
               </Button>
               <Button
-                onClick={(event) => this.handleDeleteClose(event, value)}
+                onClick={(event) => this.handleDeleteClose(event, message)}
                 color="primary"
                 variant="contained"
               >
