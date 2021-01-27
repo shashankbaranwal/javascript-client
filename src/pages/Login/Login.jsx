@@ -82,7 +82,7 @@ class Login extends React.Component {
         this.setState({
           email: '',
           password: '',
-          loading: false,
+          loading: true,
           touched: {
             email: false,
             password: false,
@@ -104,13 +104,11 @@ class Login extends React.Component {
 
     const handleEmailChange = (event) => {
       this.setState({ email: event.target.value }, () => {
-        console.log(this.state);
       });
     };
 
     const handlePasswordChange = (event) => {
       this.setState({ password: event.target.value }, () => {
-        console.log(this.state);
       });
     };
 

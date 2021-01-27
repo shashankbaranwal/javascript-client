@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-boolean-value */
 import React from 'react';
 import {
   Button,
@@ -23,29 +22,23 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-export default function MyTable(props) {
+export default function TableComponent(props) {
   const {
     id, data, column, order, orderBy, count, page, onPageChange, rowsPerPage, actions,
   } = props;
-
-  const handleSort = (field) => () => {
-    const { onSort } = props;
-    onSort(field);
-  };
-
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} style={{ border: 'solid #c0c0c0 1px' }}>
       <Table aria-label="simple table">
         <TableHead>
-          <TableRow>
+          <TableRow style={{ marginLeft: '20%' }}>
             {
               column.map((item) => (
                 <>
-                  <TableCell key={`${item.label}`} align={item.align}>
+                  <TableCell key={`${item.label}`} align={item.align} style={{ borderBottom: 'solid #c0c0c0 1px' }}>
                     <TableSortLabel
                       active={orderBy === item.field}
                       direction={order}
-                      onClick={handleSort(item.field)}
+                      style={{ marginRight: '20%' }}
                     >
                       {item.label}
                     </TableSortLabel>
@@ -57,7 +50,7 @@ export default function MyTable(props) {
         </TableHead>
         <TableBody>
           {data.map((trainees) => (
-            <StyledTableRow key={trainees.id} hover={true}>
+            <StyledTableRow key={trainees.id} hover>
               {
                 column.map((item) => (
                   <>
@@ -91,23 +84,21 @@ export default function MyTable(props) {
     </TableContainer>
   );
 }
-MyTable.propTypes = {
+TableComponent.propTypes = {
   id: PropTypes.string.isRequired,
   column: PropTypes.arrayOf(Object).isRequired,
   data: PropTypes.arrayOf(Object).isRequired,
   order: PropTypes.string,
   orderBy: PropTypes.string,
-  onSort: PropTypes.func,
   onPageChange: PropTypes.func,
   rowsPerPage: PropTypes.number,
   count: PropTypes.number,
   page: PropTypes.number,
   actions: PropTypes.arrayOf(PropTypes.any),
 };
-MyTable.defaultProps = {
+TableComponent.defaultProps = {
   order: '',
   orderBy: '',
-  onSort: () => {},
   onPageChange: () => {},
   rowsPerPage: 10,
   count: 0,

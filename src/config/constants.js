@@ -44,3 +44,6 @@ const footballOptions = [
 ];
 
 export { sports, cricketOptions, footballOptions };
+
+export const limit = 20;
+export const date = '2019-02-14';
