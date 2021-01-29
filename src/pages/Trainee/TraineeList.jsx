@@ -1,40 +1,47 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import { graphql } from '@apollo/client/react/hoc';
+import { flowRight as compose } from 'lodash';
+// import { withStyles } from '@material-ui/core/styles';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { AddDialog, EditDialog, DeleteDialog } from './components';
-import { TableComponent } from '../../components/index';
-import { getFormattedDate } from '../../libs/utils/getFormattedDate';
+import moment from 'moment';
+import trainees from './data/trainee';
+import { TableComponent } from '../../components';
+import { AddDialog, DeleteDialog, EditDialog } from './components';
 import callApi from '../../libs/utils/api';
 import { IsLoadingHOC } from '../../components/HOC';
+import { SnackBarContext } from '../../contexts';
+import { GET_USER } from './query';
 
-const asend = 'asc';
-const dsend = 'desc';
+// const styles = (theme) => ({
+//   main: {
+//     marginTop: theme.spacing(2),
+//   },
+//   icons: {},
+// });
+
 class TraineeList extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       open: false,
-      sortedBy: 'createdAt',
-      order: dsend,
-      sortedOrder: -1,
+      order: 'asc',
+      orderBy: 'name',
       page: 0,
-      edit: false,
-      deleteDialog: false,
-      skip: 0,
-      limit: 10,
-      traineeInfo: {},
-      database: [],
-      loader: false,
+      // totalCount: 0,
+      openDeleteDialog: false,
+      deleteDialogData: null,
+      openEditDialog: false,
+      editDialogData: null,
+      // traineesDataBase: trainees,
     };
   }
 
-  componentDidMount() {
-    const { setLoading } = this.props;
-    setLoading(true);
-    this.renderData();
-  }
+  // componentDidMount() {
+  //   this.traineesFromDataBase();
+  // }
 
   onOpen = () => {
     this.setState({ open: true });
@@ -44,58 +51,49 @@ class TraineeList extends Component {
     this.setState({ open: false });
   };
 
-  editDialogOpen = (item) => {
-    this.selectedItem = item;
-    this.setState({ edit: true, traineeInfo: item });
-  };
-
-  editDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ edit: false });
-  };
-
-  handleEdit = (item) => {
-    console.log(item);
-    this.editDialogClose();
+  selfCheck = async (value) => {
+    const { deleteDialogData } = this.state;
+    const { originalId } = deleteDialogData;
+    await callApi('/user', 'GET')
+      .then((res) => {
+        if (res.data.user.originalId === originalId) {
+          this.handleDeleteIconClose();
+          value("Can't Delete your self", 'error');
+        }
+      });
   }
 
-  deleteDialogOpen = (item) => {
-    this.selectedIem = item;
-    this.setState({ deleteDialog: true, traineeInfo: item });
-  };
+  renderTrainees = () => (
+    <ul>
+      {
+        trainees.map((trainee) => this.renderTrainee(trainee))
+      }
+    </ul>
+  )
 
-  deleteDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ deleteDialog: false });
-  };
-
-  handleDelete = () => {
-    const { traineeInfo } = this.state;
-    console.log(traineeInfo);
-    this.deleteDialogClose();
+  renderTrainee = (trainee) => {
+    const { match } = this.props;
+    return (
+      <li key={trainee.id}>
+        <Link to={`${match.path}/${trainee.id}`}>
+          {trainee.name}
+        </Link>
+      </li>
+    );
   }
 
   handleSort = (field) => {
-    const { order, sortedBy } = this.state;
-    let tabOrder = asend; let
-      sequence = -1;
-    if (sortedBy === field && order === asend) {
-      tabOrder = dsend;
-      sequence = 1;
+    const { order, orderBy } = this.state;
+    let newOrder = 'asc';
+    if (orderBy === field && order === 'asc') {
+      newOrder = 'desc';
     }
-    this.setState({ sortedBy: field, order: tabOrder, sortedOrder: sequence });
-  }
-
-  handlePageChange = (newPage, value) => {
-    console.log('New Page ', newPage, 'Value ', value);
-    this.setState({ page: value, skip: value * 20 }, () => {
-      this.renderData();
-      console.log('Skip ', this.skip);
+    this.setState({
+      order: newOrder,
+      orderBy: field,
+    }, () => {
+      this.traineesFromDataBase();
     });
-  }
-
-  handleSubmit = () => {
-    this.setState({ open: false });
   }
 
   handleSelect = (id) => {
@@ -105,110 +103,148 @@ class TraineeList extends Component {
     );
   }
 
-  renderData = async () => {
-    const {
-      limit, skip, sortedBy, sortedOrder, search,
-    } = this.state;
-    const { setLoading } = this.props;
-    await callApi(`/user?limit=${limit}&skip=${skip}&sortedBy=${sortedBy}&sortedOrder=${sortedOrder}&search=${search}`, 'GET')
-      .then((response) => {
-        setTimeout(() => {
-          setLoading(false);
-          this.setState({ database: response.data.data[0] });
-        }, 500);
-        console.log(response);
-      })
-      .catch(() => {
-        setLoading(false);
-        console.log('there is an errror');
-      });
+  formatDate = (date) => (moment(date).format('dddd, MMMM Do, YYYY h:mm:ss A'))
+
+  handleChangePage = (refetch) => (event, newPage) => {
+    this.setState({ page: newPage }, () => {
+      refetch({ skip: String(newPage * 5), limit: String(5) });
+    });
+  };
+
+  handleEditIcon = (e, data) => {
+    e.stopPropagation();
+    this.setState({ openEditDialog: true, editDialogData: data });
+  }
+
+  handleDeleteIcon = (e, data, value) => {
+    e.stopPropagation();
+    this.setState({ openDeleteDialog: true, deleteDialogData: data }, () => {
+      this.selfCheck(value);
+    });
+  }
+
+  handleDeleteIconClose = () => {
+    this.setState({ openDeleteDialog: false }, () => {
+      this.traineesFromDataBase();
+    });
+  }
+
+  handleEditIconClose = () => {
+    this.setState({ openEditDialog: false }, () => {
+      this.traineesFromDataBase();
+    });
   }
 
   render() {
+    const { classes } = this.props;
     const {
-      open, deleteDialog, order, sortedBy, page, edit, database, loader, traineeInfo, limit,
+      open, order, orderBy, page, deleteDialogData,
+      openDeleteDialog, openEditDialog, editDialogData,
     } = this.state;
+    const { currentState, setLoading } = this.props;
+
+    const {
+      data: {
+        getAllTrainees: { data = {}, TraineeCount = 0 } = {},
+        refetch,
+      },
+    } = this.props;
+    if (data) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    } else {
+      setLoading(true);
+    }
     return (
-      <>
-        <div style={{ float: 'right' }}>
-          <AddDialog
-            open={open}
-            onClose={this.onCloseEvent}
-            onSubmit={this.handleSubmit}
-            renderTrainee={this.renderData}
-          />
-        </div>
-        {
-          loader ? (
-            <CircularProgress size={150} color="secondary" style={{ marginLeft: '43%', marginTop: '20%' }} />
-          )
-            : (
-              <TableComponent
-                id="id"
-                data={database}
-                column={[
-                  {
-                    field: 'name',
-                    label: 'Name',
-                  },
-                  {
-                    field: 'email',
-                    label: 'Email Address',
-                    format: (value) => value && value.toUpperCase(),
-                  },
-                  {
-                    field: 'createdAt',
-                    label: 'Date',
-                    align: 'right',
-                    format: getFormattedDate,
-                  },
-                ]}
-                actions={[
-                  {
-                    icon: <EditIcon />,
-                    handler: this.editDialogOpen,
-                  },
-                  {
-                    icon: <DeleteIcon />,
-                    handler: this.deleteDialogOpen,
-                  },
-                ]}
-                sortedBy={sortedBy}
-                order={order}
-                onSort={this.handleSort}
-                count={50}
-                page={page}
-                rowsPerPage={limit}
-                onPageChange={this.handlePageChange}
-                onSelect={this.handleSelect}
-              />
-            )
-        }
-        <>
-          { edit && (
-            <EditDialog
-              editOpen={edit}
-              onClose={this.editDialogClose}
-              details={traineeInfo}
-              renderTrainee={this.renderData}
-            />
-          )}
-          { deleteDialog && (
+      <SnackBarContext.Consumer>
+        {(value) => (
+          <div>
+            {
+              (!currentState && data.length > 0) && (
+                <div>
+                  <div className={classes}>
+                    <AddDialog
+                      open={open}
+                      onClose={this.onCloseEvent}
+                      onSubmit={this.handleSubmit}
+                      renderTrainee={this.renderData}
+                    />
+                  </div>
+                  <TableComponent
+                    id={value}
+                    data={data}
+                    column={[
+                      {
+                        field: 'name',
+                        label: 'Name',
+                      },
+                      {
+                        field: 'email',
+                        label: 'Email Address',
+                      },
+                      {
+                        field: 'createdAt',
+                        label: 'Date',
+                        align: 'right',
+                        format: this.formatDate,
+                      },
+                    ]}
+                    actions={[
+                      {
+                        icon: <EditIcon className={classes} />,
+                        handler: this.handleEditIcon,
+                      },
+                      {
+                        icon: <DeleteIcon className={classes} />,
+                        handler: this.handleDeleteIcon,
+                      },
+                    ]}
+                    order={order}
+                    orderBy={orderBy}
+                    onSort={this.handleSort}
+                    onSelect={this.handleSelect}
+                    // eslint-disable-next-line radix
+                    count={parseInt(TraineeCount) + 1}
+                    page={page}
+                    onChangePage={this.handleChangePage(refetch)}
+                  />
+                </div>
+              )
+            }
             <DeleteDialog
-              deleteOpen={deleteDialog}
-              onClose={this.deleteDialogClose}
-              details={traineeInfo}
-              renderTrainee={this.renderData}
+              openDialog={openDeleteDialog}
+              onClose={this.handleDeleteIconClose}
+              data={deleteDialogData}
             />
-          )}
-        </>
-      </>
+            {
+              openEditDialog && (
+                <EditDialog
+                  editOpen={openEditDialog}
+                  onClose={this.handleEditIconClose}
+                  details={editDialogData}
+                />
+              )
+            }
+          </div>
+        )}
+      </SnackBarContext.Consumer>
     );
   }
 }
+
 TraineeList.propTypes = {
+  classes: PropTypes.objectOf(PropTypes.any).isRequired,
   match: PropTypes.objectOf(PropTypes.any).isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
+  currentState: PropTypes.bool.isRequired,
+  data: PropTypes.objectOf.isRequired,
 };
-export default IsLoadingHOC(TraineeList);
+
+// export default withStyles(styles)(IsLoadingHOC(TraineeList));
+
+export default compose(IsLoadingHOC, graphql(GET_USER,
+  {
+    options: { variables: { skip: '0', limit: '5', sort: 'name' } },
+  }))(TraineeList);

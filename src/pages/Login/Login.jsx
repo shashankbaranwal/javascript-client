@@ -1,162 +1,166 @@
-/* eslint-disable react/sort-comp */
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import { Container, InputAdornment } from '@material-ui/core/';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { Email } from '@material-ui/icons';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import * as yup from 'yup';
+import { withStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { withRouter } from 'react-router-dom';
-
 import PropTypes from 'prop-types';
+import * as yup from 'yup';
 import { SnackBarContext } from '../../contexts';
-// import callApi from '../../lib/utils/api';
+// import callApi from '../../libs/utils/api';
 
-class Login extends PureComponent {
-  constructor() {
-    super();
+const styles = (theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%',
+    marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  spinner: {
+    display: 'flex',
+    '& > * + *': {
+      marginLeft: theme.spacing(2),
+    },
+  },
+});
+
+class Login extends Component {
+  schema = yup.object().shape({
+    email: yup.string().required(),
+    password: yup.string().required(),
+  });
+
+  constructor(props) {
+    super(props);
     this.state = {
-      loading: false,
+      email: '',
+      password: '',
+      spinner: false,
       touched: {
-        email: false,
-        password: false,
+        touchedEmail: false,
+        touchedPassword: false,
       },
     };
+    this.baseState = this.state;
   }
 
-  schema = yup.object().shape({
-    email: yup.string()
-      .required()
-      .email(),
-    password: yup.string()
-      .required('password is missing')
-      .min(8, 'minimum 8 characters'),
-  })
-
-  getError(field) {
-    const { touched } = this.state;
-    if (touched[field] && this.hasErrors()) {
-      try {
-        this.schema.validateSyncAt(field, this.state);
-      } catch (err) {
-        return err.message;
-      }
-    }
-    return null;
-  }
-
-  hasErrors() {
+  handleButtonDisbale = () => {
+    const { state } = this;
     try {
-      this.schema.validateSync(this.state);
+      this.schema.validateSync(state);
     } catch (err) {
       return true;
     }
     return false;
   }
 
-  isTouched(field) {
-    const { touched } = this.state;
-    this.setState({
-      touched: {
-        ...touched,
-        [field]: true,
-      },
-    });
-  }
-
-  submit = async (e, openSnackBar) => {
+  onSubmit = async (e, value) => {
     e.preventDefault();
     const { history, loginUser } = this.props;
     const { email, password } = this.state;
-    // await callApi('/user/login', 'POST', { email, password })
+    this.setState({ spinner: true });
     await loginUser({ variables: { email, password } })
-      .then((response) => {
-        localStorage.setItem('token', response.data.loginUser);
-        openSnackBar('Login successfully', 'Success');
+      .then((res) => {
+        localStorage.setItem('token', res.data.loginUser);
+        value('Successfully logged', 'success');
+        this.setState({ spinner: false });
         history.push('/trainee');
       })
       .catch(() => {
-        this.setState({
-          email: '',
-          password: '',
-          loading: false,
-          touched: {
-            email: false,
-            password: false,
-          },
-        });
-        openSnackBar('Invalid User', 'error');
+        value('Invalid credentials', 'error');
+        this.setState(this.baseState);
       });
+  };
+
+  handleNameChange = async (e, field, touchField) => {
+    const { touched } = this.state;
+    await this.setState({ [field]: e.target.value, touched: { ...touched, [touchField]: false } });
+    if (field === 'email') {
+      this.validateEmail();
+    }
   }
 
-  loadingHandler = () => {
-    const { loading } = this.state;
-    if (!loading) {
-      this.setState({ loading: true });
+  validateEmail = () => {
+    const { email, touched } = this.state;
+    if (!new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i).test(email)) {
+      this.setState({
+        touched: {
+          ...touched,
+          touchedEmail: true,
+        },
+      });
+    }
+  }
+
+  isTouched = (field, touchedField) => {
+    const { touched } = this.state;
+    // eslint-disable-next-line react/destructuring-assignment
+    if (this.state[field] === '') {
+      this.setState({
+        touched: {
+          ...touched,
+          [touchedField]: true,
+        },
+      });
     }
   }
 
   render() {
-    const { email, password, loading } = this.state;
-
-    const handleEmailChange = (event) => {
-      this.setState({ email: event.target.value }, () => {
-        console.log(this.state);
-      });
-    };
-
-    const handlePasswordChange = (event) => {
-      this.setState({ password: event.target.value }, () => {
-        console.log(this.state);
-      });
-    };
-
+    const { classes } = this.props;
+    const {
+      email, password, spinner,
+    } = this.state;
+    const {
+      touchedEmail, touchedPassword,
+    // eslint-disable-next-line react/destructuring-assignment
+    } = this.state.touched;
     return (
       <SnackBarContext.Consumer>
         {(value) => (
           <Container component="main" maxWidth="xs">
             <CssBaseline />
-            <Box boxShadow={3} maxWidth="lg" p={2} mt={15}>
-              <Avatar style={{ backgroundColor: 'red', margin: 'auto' }}>
+            <div className={classes.paper}>
+              <Avatar className={classes.avatar}>
                 <LockOutlinedIcon />
               </Avatar>
-              <Typography component="h1" variant="h5" align="center" style={{ marginBottom: '30px' }}>
-                Login
+              <Typography component="h1" variant="h5">
+                Sign in
               </Typography>
-              <form onSubmit={(event) => this.submit(event, value)}>
+              <form className={classes.form} noValidate>
                 <TextField
-                  value={email}
-                  error={this.getError('email')}
-                  onBlur={() => { this.isTouched('email'); }}
-                  onChange={handleEmailChange}
                   variant="outlined"
                   margin="normal"
                   required
                   fullWidth
                   id="email"
+                  value={email}
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Email />
-                      </InputAdornment>
-                    ),
-                  }}
+                  autoFocus
+                  onChange={(e) => this.handleNameChange(e, 'email', 'touchedEmail')}
+                  onBlur={() => this.isTouched('email', 'touchedEmail')}
+                  error={touchedEmail}
+                  // eslint-disable-next-line no-nested-ternary
+                  helperText={touchedEmail ? (email === '' ? 'Email is Required' : 'Enter the valid Email') : ' '}
                 />
-                <div><p style={{ color: 'red', marginTop: '0px' }}>{ this.getError('email')}</p></div>
                 <TextField
-                  value={password}
-                  error={this.getError('password')}
-                  onBlur={() => { this.isTouched('password'); }}
-                  onChange={handlePasswordChange}
                   variant="outlined"
                   margin="normal"
                   required
@@ -165,30 +169,33 @@ class Login extends PureComponent {
                   label="Password"
                   type="password"
                   id="password"
+                  value={password}
                   autoComplete="current-password"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <VisibilityOffIcon />
-                      </InputAdornment>
-                    ),
-                  }}
+                  onChange={(e) => this.handleNameChange(e, 'password', 'touchedPassword')}
+                  onBlur={() => this.isTouched('password', 'touchedPassword')}
+                  error={touchedPassword}
+                  helperText={touchedPassword ? 'Password is Required' : ' '}
                 />
-                <div><p style={{ color: 'red', marginTop: '0px' }}>{ this.getError('password')}</p></div>
                 <Button
+                  type="submit"
                   fullWidth
                   variant="contained"
                   color="primary"
-                  disabled={this.hasErrors()}
-                  style={{ marginTop: '20px' }}
-                  type="submit"
-                  onClick={this.loadingHandler}
+                  className={classes.submit}
+                  disabled={this.handleButtonDisbale()}
+                  onClick={(event) => this.onSubmit(event, value)}
                 >
-                  Sign In
-                  {loading && (<CircularProgress size={21} color="secondary" />)}
+                  {!spinner && ('Sign In')}
+                  {
+                    spinner && (
+                      <div className={classes.root}>
+                        <CircularProgress color="secondary" />
+                      </div>
+                    )
+                  }
                 </Button>
               </form>
-            </Box>
+            </div>
           </Container>
         )}
       </SnackBarContext.Consumer>
@@ -197,8 +204,9 @@ class Login extends PureComponent {
 }
 
 Login.propTypes = {
+  classes: PropTypes.objectOf(PropTypes.string).isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired,
-  loginUser: PropTypes.objectOf(PropTypes.any).isRequired,
+  loginUser: PropTypes.func.isRequired,
 };
 
-export default withRouter(Login);
+export default withRouter(withStyles(styles)(Login));

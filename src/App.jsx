@@ -36,6 +36,9 @@ const App = () => (
               <PrivateRoute path="/InputDemo" component={InputDemo} />
               <PrivateRoute path="/Trainee" component={Trainee} />
               <PrivateRoute component={NotFound} />
+              <Route path="*">
+                <Redirect to="/notFound" />
+              </Route>
             </Switch>
           </Router>
         </ThemeProvider>
