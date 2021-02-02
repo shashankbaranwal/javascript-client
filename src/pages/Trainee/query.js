@@ -1,26 +1,17 @@
-import { gql } from '@apollo/client';
+import { gql } from 'apollo-boost';
 
-const GET_USER = gql`
-  query getAllTrainees($skip: Int, $limit: Int, $sort: String) {
-    getAllTrainees(display: {skip: $skip, limit: $limit, sort: $sort}){
-    status
-    message
-    data {
-      totalCount
-      count
-      data {
-        _id
-        name
-        email
-        role
-        password
-        createdAt
-      }
+const GET = gql`
+query getAllTrainees($skip: String, $limit: String, $sortedBy: String, $sortedOrder: String ) {
+    getAllTrainees(payload: { skip: $skip, limit: $limit, sortedBy: $sortedBy, sortedOrder: $sortedOrder }) {
+        totalCount
+        count
+        data {
+            name
+            email
+            createdAt
+            _id
+            originalId
+        }
     }
-    }
-  }
-`;
-
-export {
-  GET_USER,
-};
+}`;
+export { GET };
