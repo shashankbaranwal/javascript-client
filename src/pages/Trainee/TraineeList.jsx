@@ -2,13 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { graphql } from '@apollo/react-hoc';
+
 import { AddDialog, EditDialog, DeleteDialog } from './components';
 import { TableComponent } from '../../components/index';
 import { getFormattedDate } from '../../libs/utils/getFormattedDate';
-// import callApi from '../../libs/utils/api';
-// import { IsLoadingHOC } from '../../components/HOC';
 import { GET } from './query';
 
 const dsend = 'desc';
@@ -29,8 +27,10 @@ class TraineeList extends Component {
   }
 
   componentDidMount() {
-    const { setLoading } = this.props;
-    setLoading(true);
+    this.setState({ loader: true });
+    setTimeout(() => {
+      this.setState({ loader: false });
+    }, 600);
   }
 
   onOpen = () => {
@@ -103,40 +103,18 @@ class TraineeList extends Component {
     );
   }
 
-  renderData = async () => {
-    // const {
-    //   limit, skip, sortedBy, sortedOrder, search,
-    // } = this.state;
-    // const { setLoading } = this.props;
-    // await callApi(`/user?limit=${limit}&skip=${skip}&sortedBy=${sortedBy}
-    // &sortedOrder=${sortedOrder}&search=${search}`, 'GET')
-    //   .then((response) => {
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //       this.setState({ database: response.data.data[0] });
-    //     }, 500);
-    //     console.log(response);
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //     console.log('there is an errror');
-    //   });
+  renderData = () => {
+    this.setState({ loader: false });
   }
 
   render() {
     const {
       data: {
-        getAllTrainees: { data = [], totalCount = 0 } = {},
+        getAllTrainees: { records = [], totalCount = 0 } = {},
         refetch,
       },
     } = this.props;
-    if (data) {
-      setTimeout(() => {
-        this.setState({ loader: false });
-      }, 500);
-    } else {
-      this.setState({ loader: true });
-    }
+
     const {
       open, deleteDialog, order, sortedBy, page, edit, loader, traineeInfo, limit,
     } = this.state;
@@ -147,64 +125,58 @@ class TraineeList extends Component {
             open={open}
             onClose={this.onCloseEvent}
             onSubmit={this.handleSubmit}
-            renderTrainee={this.renderData}
+            refetchQueries={refetch}
           />
         </div>
-        {
-          loader ? (
-            <CircularProgress size={150} color="secondary" style={{ marginLeft: '43%', marginTop: '20%' }} />
-          )
-            : (
-              <TableComponent
-                id="id"
-                data={data}
-                column={[
-                  {
-                    field: 'name',
-                    label: 'Name',
-                  },
-                  {
-                    field: 'email',
-                    label: 'Email Address',
-                    format: (value) => value && value.toUpperCase(),
-                  },
-                  {
-                    field: 'createdAt',
-                    label: 'Date',
-                    align: 'right',
-                    format: getFormattedDate,
-                  },
-                ]}
-                actions={[
-                  {
-                    icon: <EditIcon />,
-                    handler: this.editDialogOpen,
-                  },
-                  {
-                    icon: <DeleteIcon />,
-                    handler: this.deleteDialogOpen,
-                  },
-                ]}
-                sortedBy={sortedBy}
-                order={order}
-                onSort={this.handleSort}
-                count={totalCount}
-                page={page}
-                rowsPerPage={limit}
-                onPageChange={this.handlePageChange(refetch)}
-                onSelect={this.handleSelect}
-                loader={loader}
-                dataCount={totalCount}
-              />
-            )
-        }
+        <TableComponent
+          id="id"
+          data={records}
+          column={[
+            {
+              field: 'name',
+              label: 'Name',
+            },
+            {
+              field: 'email',
+              label: 'Email Address',
+              format: (value) => value && value.toUpperCase(),
+            },
+            {
+              field: 'createdAt',
+              label: 'Date',
+              align: 'right',
+              format: getFormattedDate,
+            },
+          ]}
+          actions={[
+            {
+              icon: <EditIcon />,
+              handler: this.editDialogOpen,
+            },
+            {
+              icon: <DeleteIcon />,
+              handler: this.deleteDialogOpen,
+            },
+          ]}
+          sortedBy={sortedBy}
+          order={order}
+          onSort={this.handleSort}
+          count={totalCount}
+          page={page}
+          rowsPerPage={limit}
+          onPageChange={this.handlePageChange(refetch)}
+          onSelect={this.handleSelect}
+          loader={loader}
+          dataCount={totalCount}
+        />
         <>
           { edit && (
             <EditDialog
               editOpen={edit}
               onClose={this.editDialogClose}
               details={traineeInfo}
-              renderTrainee={this.renderData}
+              renderTrainee={records}
+              refetchQueries={refetch}
             />
           )}
           { deleteDialog && (
@@ -212,7 +184,7 @@ class TraineeList extends Component {
               deleteOpen={deleteDialog}
               onClose={this.deleteDialogClose}
               details={traineeInfo}
-              renderTrainee={this.renderData}
+              refetchQueries={refetch}
             />
           )}
         </>
@@ -220,17 +192,18 @@ class TraineeList extends Component {
     );
   }
 }
+
 TraineeList.propTypes = {
   match: PropTypes.objectOf(PropTypes.any).isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired,
-  setLoading: PropTypes.func.isRequired,
-  data: PropTypes.objectOf.isRequired,
+  data: PropTypes.isRequired,
 };
+
 export default graphql(GET,
   {
     options: {
       variables: {
-        skip: '0', limit: '10', sortedBy: 'name', sortedOrder: '1',
+        skip: '0', limit: '10', sortedBy: 'createdAt', sortedOrder: '-1',
       },
     },
   })(TraineeList);
