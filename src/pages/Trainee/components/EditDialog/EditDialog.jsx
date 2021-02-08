@@ -15,7 +15,7 @@ import {
 
 import { Email, Person } from '@material-ui/icons';
 import { SnackBarContext } from '../../../../contexts';
-import callApi from '../../../../libs/utils/api';
+// import callApi from '../../../../libs/utils/api';
 
 class EditDialog extends Component {
   schema = yup.object().shape({
@@ -110,15 +110,17 @@ class EditDialog extends Component {
   };
 
   onSubmit = async (e, value) => {
-    e.preventDefault();
-    const { onClose, details, renderTrainee } = this.props;
+    const {
+      onClose, details, updateTrainee, refetchQueries,
+    } = this.props;
     const { name, email } = this.state;
     const { originalId } = details;
-    await callApi('/trainee', 'PUT', { originalId, name, email })
+    // await callApi(`/trainee`, 'PUT', { originalId, name, email })
+    await updateTrainee({ variables: { originalId, name, email } })
       .then(() => {
         this.onConsole();
         value('Successfully Edited!', 'success');
-        renderTrainee();
+        refetchQueries();
         onClose();
       })
       .catch(() => {
@@ -204,7 +206,8 @@ EditDialog.propTypes = {
   onClose: PropTypes.func,
   editOpen: PropTypes.bool,
   // history: PropTypes.objectOf(PropTypes.any).isRequired,
-  renderTrainee: PropTypes.func.isRequired,
+  updateTrainee: PropTypes.func.isRequired,
+  refetchQueries: PropTypes.func.isRequired,
 };
 
 EditDialog.defaultProps = {

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -8,9 +9,7 @@ import {
   DialogTitle,
   Button,
 } from '@material-ui/core';
-
 import { SnackBarContext } from '../../../../contexts';
-import callApi from '../../../../libs/utils/api';
 
 class DeleteDialog extends Component {
   constructor(props) {
@@ -18,24 +17,27 @@ class DeleteDialog extends Component {
     this.state = {};
   }
 
-  handleDeleteClose = async (event, message) => {
-    event.preventDefault();
-    const { details, onClose, renderTrainee } = this.props;
+  handleDeleteClose = async (event, value) => {
+    const {
+      deleteTrainee, details, onClose, refetchQueries,
+    } = this.props;
     const originalDate = new Date(details.createdAt);
     const dateCheck = new Date('2019-02-14');
     const { originalId } = details;
-    await callApi('/trainee', 'DELETE', { originalId })
+    console.log('Delete', deleteTrainee);
+    // await callApi('/trainee', 'DELETE', {originalId})
+    await deleteTrainee({ variables: { originalId } })
       .then(() => {
         if (originalDate > dateCheck) {
           console.log('Deleted Item', details);
-          message('Successfully Deleted!', 'success');
-          renderTrainee();
+          value('Successfully Deleted!', 'success');
+          refetchQueries();
         } else {
-          message("Can't Delete!", 'error');
+          value("Can't Delete!", 'error');
         }
       })
       .catch(() => {
-        message('Error, Can not Delete!', 'error');
+        value('Error, Can not Delete!', 'error');
       });
     onClose();
   };
@@ -75,7 +77,8 @@ DeleteDialog.propTypes = {
   details: PropTypes.objectOf(PropTypes.any).isRequired,
   onClose: PropTypes.func,
   deleteOpen: PropTypes.bool,
-  renderTrainee: PropTypes.func.isRequired,
+  refetchQueries: PropTypes.isRequired,
+  deleteTrainee: PropTypes.isRequired,
 };
 
 DeleteDialog.defaultProps = {
