@@ -110,7 +110,7 @@ class TraineeList extends Component {
   render() {
     const {
       data: {
-        getAllTrainees: { records = [], totalCount = 0 } = {},
+        getAllTrainees: { data = [], totalCount = 0 } = {},
         refetch,
       },
     } = this.props;
@@ -130,7 +130,7 @@ class TraineeList extends Component {
         </div>
         <TableComponent
           id="id"
-          data={records}
+          data={data}
           column={[
             {
               field: 'name',
@@ -175,7 +175,7 @@ class TraineeList extends Component {
               editOpen={edit}
               onClose={this.editDialogClose}
               details={traineeInfo}
-              renderTrainee={records}
+              renderTrainee={data}
               refetchQueries={refetch}
             />
           )}
