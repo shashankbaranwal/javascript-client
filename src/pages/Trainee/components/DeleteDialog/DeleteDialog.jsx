@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -9,7 +8,9 @@ import {
   DialogTitle,
   Button,
 } from '@material-ui/core';
+
 import { SnackBarContext } from '../../../../contexts';
+// import callApi from '../../../../lib/utils/api';
 
 class DeleteDialog extends Component {
   constructor(props) {
@@ -28,10 +29,10 @@ class DeleteDialog extends Component {
     // await callApi('/trainee', 'DELETE', {originalId})
     await deleteTrainee({ variables: { originalId } })
       .then(() => {
+        refetchQueries();
         if (originalDate > dateCheck) {
           console.log('Deleted Item', details);
           value('Successfully Deleted!', 'success');
-          refetchQueries();
         } else {
           value("Can't Delete!", 'error');
         }
@@ -46,7 +47,7 @@ class DeleteDialog extends Component {
     const { deleteOpen, onClose } = this.props;
     return (
       <SnackBarContext.Consumer>
-        {(message) => (
+        {(value) => (
           <Dialog open={deleteOpen} onClose={onClose}>
             <DialogTitle>Remove Trainee</DialogTitle>
             <DialogContent>
@@ -59,7 +60,7 @@ class DeleteDialog extends Component {
                 Cancel
               </Button>
               <Button
-                onClick={(event) => this.handleDeleteClose(event, message)}
+                onClick={(event) => this.handleDeleteClose(event, value)}
                 color="primary"
                 variant="contained"
               >

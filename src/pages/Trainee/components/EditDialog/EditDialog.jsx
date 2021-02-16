@@ -15,7 +15,7 @@ import {
 
 import { Email, Person } from '@material-ui/icons';
 import { SnackBarContext } from '../../../../contexts';
-// import callApi from '../../../../libs/utils/api';
+// import callApi from '../../../../lib/utils/api';
 
 class EditDialog extends Component {
   schema = yup.object().shape({
@@ -25,6 +25,7 @@ class EditDialog extends Component {
 
   constructor(props) {
     super(props);
+    console.log('inside constructor');
     this.state = {
       name: this.props.details.name,
       email: this.props.details.email,
@@ -37,11 +38,13 @@ class EditDialog extends Component {
 
   handleNameValue = (event) => {
     this.setState({ name: event.target.value }, () => {
+      console.log(this.state);
     });
   };
 
   handleEmailValue = (event) => {
     this.setState({ email: event.target.value }, () => {
+      console.log(this.state);
     });
   };
 
@@ -205,7 +208,6 @@ EditDialog.propTypes = {
   details: PropTypes.objectOf(PropTypes.any).isRequired,
   onClose: PropTypes.func,
   editOpen: PropTypes.bool,
-  // history: PropTypes.objectOf(PropTypes.any).isRequired,
   updateTrainee: PropTypes.func.isRequired,
   refetchQueries: PropTypes.func.isRequired,
 };
