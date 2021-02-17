@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/react-hoc';
 import TraineeList from './TraineeList';
 import TraineeDetail from './TraineeDetail';
 import apolloClient from '../../libs/apollo-client';
