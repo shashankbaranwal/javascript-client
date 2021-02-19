@@ -1,45 +1,33 @@
+import { Typography, makeStyles } from '@material-ui/core';
 import React from 'react';
-import PropType from 'prop-types';
-import {
-  withStyles, createMuiTheme, ThemeProvider, Typography,
-} from '@material-ui/core';
 
-const styles = () => ({
-  Text: {
-    color: 'grey',
+const useStyles = makeStyles((theme) => ({
+  Spacing: {
+    marginTop: theme.spacing(4),
   },
-});
+}));
 
-const theme = createMuiTheme({
-  typography: {
-    htmlFontSize: 10,
-    fontFamily: [
-      'Arial',
-    ].join(','),
-  },
-});
-const NotFound = (props) => {
-  const { classes } = props;
+const NoMatch = () => {
+  const classes = useStyles();
   return (
     <>
-      <ThemeProvider theme={theme}>
-        <Typography>
-          <div className={classes.Text} align="center">
-            <h1>
-              NOT FOUND
-            </h1>
-            <h4>
-              seems like the pages you are looking after does not exist
-            </h4>
-          </div>
+      <Typography align="center" component="div" className={classes.Spacing}>
+        <Typography variant="h3" component="div" color="secondary" display="inline">
+          N
+          <Typography variant="h4" component="div" display="inline">OT </Typography>
         </Typography>
-      </ThemeProvider>
+        <Typography variant="h3" component="div" color="primary" display="inline">
+          F
+          <Typography variant="h4" component="div" display="inline">
+            OUND
+          </Typography>
+        </Typography>
+        <Typography variant="body2" align="center" color="textSecondary">
+          Seems like the page you are searching for does not exist.
+        </Typography>
+      </Typography>
     </>
   );
 };
 
-NotFound.propTypes = {
-  classes: PropType.objectOf(PropType.string).isRequired,
-};
-
-export default withStyles(styles)(NotFound);
+export default NoMatch;

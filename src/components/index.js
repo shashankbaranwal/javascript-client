@@ -5,3 +5,4 @@ export { RadioField } from './RadioGroup';
 export { ButtonField } from './Button';
 export { Math } from './Math';
 export { TableComponent } from './Table';
+export { withLoaderAndMessage } from './HOC';

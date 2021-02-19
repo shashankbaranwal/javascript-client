@@ -1,42 +1,38 @@
 import React from 'react';
+import { ThemeProvider, CssBaseline } from '@material-ui/core';
+import { BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import { ApolloProvider } from '@apollo/client';
+import { AuthRoute, PrivateRoute } from './routes';
 import {
-  BrowserRouter as Router,
-  Route,
-  Redirect,
-  Switch,
-} from 'react-router-dom';
-import { ThemeProvider } from '@material-ui/core/styles';
-import {
-  TextFieldDemo,
-  InputDemo,
-  Trainee,
-  ChildrenDemo,
-  Login,
-  NotFound,
-} from './pages/index';
-import { AuthRoute, PrivateRoute } from './routes/index';
-import { SnackBarProvider } from './contexts/index';
-import themeStyle from './theme';
+  ChildrenDemo, TextFieldDemo, InputDemo, LoginUi, NoMatch,
+} from './pages';
+import { TraineeDetails, TraineeList } from './pages/Trainee';
+import theme from './theme';
+import { SnackBarProvider } from './contexts';
+import apolloClient from './libs/apollo-client';
 
-const App = () => (
-  <>
-    <SnackBarProvider>
-      <ThemeProvider theme={themeStyle}>
-        <Router>
-          <Switch>
-            <Route exact path="/" component={Trainee}>
-              <Redirect to="/login" />
-            </Route>
-            <AuthRoute path="/login" component={Login} />
-            <PrivateRoute path="/ChildrenDemo" component={ChildrenDemo} />
-            <PrivateRoute path="/TextFieldDemo" component={TextFieldDemo} />
-            <PrivateRoute path="/InputDemo" component={InputDemo} />
-            <PrivateRoute path="/Trainee" component={Trainee} />
-            <PrivateRoute component={NotFound} />
-          </Switch>
-        </Router>
-      </ThemeProvider>
-    </SnackBarProvider>
-  </>
-);
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <SnackBarProvider>
+        <ApolloProvider client={apolloClient}>
+          <CssBaseline />
+          <Router>
+            <Switch>
+              <Redirect exact path="/" to="/trainee" />
+              <AuthRoute exact path="/login" component={LoginUi} />
+              <PrivateRoute exact path="/trainee" component={TraineeList} />
+              <PrivateRoute exact path="/trainee/:id" component={TraineeDetails} />
+              <PrivateRoute exact path="/input-demo" component={InputDemo} />
+              <PrivateRoute exact path="/text-field-demo" component={TextFieldDemo} />
+              <PrivateRoute exact path="/children-demo" component={ChildrenDemo} />
+              <PrivateRoute default component={NoMatch} />
+            </Switch>
+          </Router>
+        </ApolloProvider>
+      </SnackBarProvider>
+    </ThemeProvider>
+  );
+}
+
 export default App;

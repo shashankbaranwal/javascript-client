@@ -1,214 +1,316 @@
-import React, { Component } from 'react';
+/* eslint-disable react/forbid-prop-types */
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Button, CssBaseline } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import moment from 'moment';
+import { useQuery, useMutation } from '@apollo/client';
 import { AddDialog, EditDialog, DeleteDialog } from './components';
-import { TableComponent } from '../../components/index';
-import { getFormattedDate } from '../../libs/utils/getFormattedDate';
-import callApi from '../../libs/utils/api';
-import { IsLoadingHOC } from '../../components/HOC';
+import { TableComponent, withLoaderAndMessage } from '../../components';
+import { SnackbarContext } from '../../contexts';
+import { GETALL_TRAINEES } from './query';
+import { CREATE_TRAINEE, UPDATE_TRAINEE, DELETE_TRAINEE } from './mutation';
+import { TRAINEE_UPDATED, TRAINEE_DELETED, TRAINEE_ADDED } from './subscriptions';
 
-const asend = 'asc';
-const dsend = 'desc';
-class TraineeList extends Component {
-  constructor() {
-    super();
-    this.state = {
-      open: false,
-      sortedBy: 'createdAt',
-      order: dsend,
-      sortedOrder: -1,
-      page: 0,
-      edit: false,
-      deleteDialog: false,
-      skip: 0,
-      limit: 10,
-      traineeInfo: {},
-      database: [],
-      loader: false,
-    };
-  }
+const TraineeList = (props) => {
+  const { match, history } = props;
+  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [order, setOrder] = useState();
+  const [orderBy, setOrderBy] = useState();
+  const [page, setPage] = useState(0);
+  const [details, setDetails] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [limit, setLimit] = useState(5);
+  const skip = page * limit;
 
-  componentDidMount() {
-    const { setLoading } = this.props;
-    setLoading(true);
-    this.renderData();
-  }
+  const {
+    subscribeToMore, data, loading: getAllTraineeLoading,
+  } = useQuery(GETALL_TRAINEES, {
+    variables: {
+      skip,
+      limit,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
 
-  onOpen = () => {
-    this.setState({ open: true });
+  const handleChangeRowsPerPage = (event) => {
+    setLimit(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
-  onCloseEvent = () => {
-    this.setState({ open: false });
-  };
-
-  editDialogOpen = (item) => {
-    this.selectedItem = item;
-    this.setState({ edit: true, traineeInfo: item });
-  };
-
-  editDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ edit: false });
-  };
-
-  handleEdit = (item) => {
-    console.log(item);
-    this.editDialogClose();
-  }
-
-  deleteDialogOpen = (item) => {
-    this.selectedIem = item;
-    this.setState({ deleteDialog: true, traineeInfo: item });
-  };
-
-  deleteDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ deleteDialog: false });
-  };
-
-  handleDelete = () => {
-    const { traineeInfo } = this.state;
-    console.log(traineeInfo);
-    this.deleteDialogClose();
-  }
-
-  handleSort = (field) => {
-    const { order, sortedBy } = this.state;
-    let tabOrder = asend; let
-      sequence = -1;
-    if (sortedBy === field && order === asend) {
-      tabOrder = dsend;
-      sequence = 1;
+  let trainees = [];
+  let traineeCount = 0;
+  if (!getAllTraineeLoading) {
+    try {
+      const { getAll } = data;
+      trainees = getAll;
+      traineeCount = getAll.length;
+    } catch {
+      trainees = [];
+      traineeCount = 0;
     }
-    this.setState({ sortedBy: field, order: tabOrder, sortedOrder: sequence });
   }
+  console.log(trainees);
+  const [createTrainee] = useMutation(CREATE_TRAINEE);
+  const [updateTrainee] = useMutation(UPDATE_TRAINEE);
+  const [deleteTrainee] = useMutation(DELETE_TRAINEE);
 
-  handlePageChange = (newPage, value) => {
-    console.log('New Page ', newPage, 'Value ', value);
-    this.setState({ page: value, skip: value * 20 }, () => {
-      this.renderData();
-      console.log('Skip ', this.skip);
+  const EnhancedTable = withLoaderAndMessage(TableComponent);
+
+  useEffect(() => {
+    subscribeToMore({
+      document: TRAINEE_UPDATED,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList } = {} } = {} } = prev;
+        const { data: { traineeUpdated: { data: newTrainee } = {} } = {} } = subscriptionData;
+        const newList = UsersList.map((trainee) => {
+          if (trainee.originalId === newTrainee.originalId) {
+            return {
+              ...trainee,
+              ...newTrainee,
+            };
+          }
+          return trainee;
+        });
+        return {
+          getAllTrainees: {
+            ...prev,
+            data: {
+              UsersList: newList,
+            },
+          },
+        };
+      },
     });
-  }
+    subscribeToMore({
+      document: TRAINEE_DELETED,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList = [], totalCount = 0 } } = {} } = prev;
+        const newList = UsersList.map((trainee) => {
+          if (trainee.originalId === details.originalId) {
+            return {};
+          }
+          return trainee;
+        });
+        return {
+          getAllTrainees: {
+            ...prev,
+            data: {
+              UsersList: newList,
+              totalCount: totalCount - 1,
+            },
+          },
+        };
+      },
+    });
+    subscribeToMore({
+      document: TRAINEE_ADDED,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList, totalCount } = {} } = {} } = prev;
+        const { data: { traineeAdded: { data: newTrainee } = {} } = {} } = subscriptionData;
+        const newList = [newTrainee, ...UsersList];
+        return {
+          getAllTrainees: {
+            ...prev,
+            data: {
+              UsersList: newList,
+              totalCount: totalCount + 1,
+            },
+          },
+        };
+      },
+    });
+  }, []);
 
-  handleSubmit = () => {
-    this.setState({ open: false });
-  }
+  const handleSort = (property) => {
+    setOrder(order === 'asc' && orderBy === property ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
-  handleSelect = (id) => {
-    const { match, history } = this.props;
-    return (
-      history.push(`${match.path}/${id}`)
-    );
-  }
+  const handleSelect = (property) => {
+    history.push(`${match.path}/${property}`);
+  };
 
-  renderData = async () => {
-    const {
-      limit, skip, sortedBy, sortedOrder, search,
-    } = this.state;
-    const { setLoading } = this.props;
-    await callApi(`/user?limit=${limit}&skip=${skip}&sortedBy=${sortedBy}&sortedOrder=${sortedOrder}&search=${search}`, 'GET')
-      .then((response) => {
-        setTimeout(() => {
-          setLoading(false);
-          this.setState({ database: response.data.data[0] });
-        }, 500);
-        console.log(response);
-      })
-      .catch(() => {
+  const handleOpenAddTrainee = () => {
+    setOpen(!open);
+  };
+
+  const handleSubmit = async (openSnackbar, state) => {
+    setLoading(true);
+    console.log(state);
+    const { name, email, password } = state;
+    try {
+      const response = await createTrainee({ variables: { name, email, password } });
+      const { data: { createTrainee: { message, status } = {} } = {} } = response;
+      if (status === 'success') {
+        openSnackbar(status, message);
+        setOpen(false);
+      } else {
+        openSnackbar('error', message);
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      openSnackbar('error', 'Something Went Wrong');
+    }
+  };
+
+  const getDateFormatted = (date) => moment(date).format('dddd, MMMM Do yyyy, hh:mm:ss a');
+
+  const handleEditDialogOpen = (traineeDetails) => {
+    setEditOpen(true);
+    setDetails(traineeDetails);
+  };
+
+  const handleDeleteDialogOpen = (traineeDetails) => {
+    setDeleteOpen(true);
+    setDetails(traineeDetails);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditOpen(false);
+  };
+
+  const handleEditDialogSubmit = async (openSnackbar, state) => {
+    setLoading(true);
+    console.log(state);
+    const { originalId } = details;
+    const { email, name } = state;
+    try {
+      const response = await updateTrainee({ variables: { id: originalId, email, name } });
+      const { data: { updateTrainee: { message = '', status = '' } = {} } = {} } = response;
+      if (status === 'success') {
+        openSnackbar(status, message);
+        setEditOpen(false);
+      } else {
+        openSnackbar('error', message);
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      openSnackbar('error', 'Something Went Wrong');
+    }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleDelete = async (openSnackbar) => {
+    setLoading(true);
+    console.log(details);
+    const { originalId } = details;
+    if (details.createdAt <= '2019-02-14') {
+      openSnackbar('error', 'Trainee cannot be Deleted');
+    } else {
+      try {
+        const response = await deleteTrainee({ variables: { id: originalId } });
+        const { data: { deleteTrainee: { message = {}, status = {} } = {} } = {} } = response;
+        if (status === 'success') {
+          openSnackbar(status, message);
+          setEditOpen(false);
+        } else {
+          openSnackbar('error', message);
+        }
         setLoading(false);
-        console.log('there is an errror');
-      });
-  }
+        if (page > 0 && trainees.length === 1) {
+          setPage(page - 1);
+        }
+      } catch {
+        openSnackbar('error', 'Something Went Wrong');
+      }
+    }
+    setDeleteOpen(false);
+  };
 
-  render() {
-    const {
-      open, deleteDialog, order, sortedBy, page, edit, database, loader, traineeInfo, limit,
-    } = this.state;
-    return (
-      <>
-        <div style={{ float: 'right' }}>
+  return (
+    <SnackbarContext.Consumer>
+      {({ openSnackbar }) => (
+        <>
+          <CssBaseline />
+          <Button size="large" variant="outlined" color="primary" onClick={handleOpenAddTrainee}>
+            Add Trainee
+          </Button>
+          <EnhancedTable
+            id="originalId"
+            data={trainees}
+            loader={getAllTraineeLoading}
+            dataLength={traineeCount}
+            column={[
+              {
+                field: 'name',
+                label: 'Name',
+              },
+              {
+                field: 'email',
+                label: 'Email Address',
+                format: (value) => value && value.toUpperCase(),
+              },
+              {
+                field: 'createdAt',
+                label: 'Date',
+                align: 'right',
+                format: getDateFormatted,
+              },
+            ]}
+            actions={[
+              {
+                icon: <EditIcon />,
+                handler: handleEditDialogOpen,
+              },
+              {
+                icon: <DeleteIcon />,
+                handler: handleDeleteDialogOpen,
+              },
+            ]}
+            order={order}
+            orderBy={orderBy}
+            onSort={handleSort}
+            onSelect={handleSelect}
+            page={page}
+            onChangePage={handleChangePage}
+            count={traineeCount}
+            rowsPerPage={limit}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+          />
           <AddDialog
             open={open}
-            onClose={this.onCloseEvent}
-            onSubmit={this.handleSubmit}
-            renderTrainee={this.renderData}
+            loading={loading}
+            onClose={handleOpenAddTrainee}
+            onSubmit={(addTraineeState) => handleSubmit(openSnackbar, addTraineeState)}
           />
-        </div>
-        {
-          loader ? (
-            <CircularProgress size={150} color="secondary" style={{ marginLeft: '43%', marginTop: '20%' }} />
-          )
-            : (
-              <TableComponent
-                id="id"
-                data={database}
-                column={[
-                  {
-                    field: 'name',
-                    label: 'Name',
-                  },
-                  {
-                    field: 'email',
-                    label: 'Email Address',
-                    format: (value) => value && value.toUpperCase(),
-                  },
-                  {
-                    field: 'createdAt',
-                    label: 'Date',
-                    align: 'right',
-                    format: getFormattedDate,
-                  },
-                ]}
-                actions={[
-                  {
-                    icon: <EditIcon />,
-                    handler: this.editDialogOpen,
-                  },
-                  {
-                    icon: <DeleteIcon />,
-                    handler: this.deleteDialogOpen,
-                  },
-                ]}
-                sortedBy={sortedBy}
-                order={order}
-                onSort={this.handleSort}
-                count={50}
-                page={page}
-                rowsPerPage={limit}
-                onPageChange={this.handlePageChange}
-                onSelect={this.handleSelect}
-              />
-            )
-        }
-        <>
-          { edit && (
-            <EditDialog
-              editOpen={edit}
-              onClose={this.editDialogClose}
-              details={traineeInfo}
-              renderTrainee={this.renderData}
-            />
-          )}
-          { deleteDialog && (
-            <DeleteDialog
-              deleteOpen={deleteDialog}
-              onClose={this.deleteDialogClose}
-              details={traineeInfo}
-              renderTrainee={this.renderData}
-            />
-          )}
+          <EditDialog
+            open={editOpen}
+            loading={loading}
+            onClose={handleEditDialogClose}
+            onSubmit={(editTraineeState) => handleEditDialogSubmit(openSnackbar, editTraineeState)}
+            defaultValues={details}
+          />
+          <DeleteDialog
+            open={deleteOpen}
+            loading={loading}
+            onClose={handleDeleteClose}
+            onDelete={() => handleDelete(openSnackbar)}
+          />
         </>
-      </>
-    );
-  }
-}
-TraineeList.propTypes = {
-  match: PropTypes.objectOf(PropTypes.any).isRequired,
-  history: PropTypes.objectOf(PropTypes.any).isRequired,
-  setLoading: PropTypes.func.isRequired,
+      )}
+    </SnackbarContext.Consumer>
+  );
 };
-export default IsLoadingHOC(TraineeList);
+
+TraineeList.propTypes = {
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+};
+
+export default TraineeList;

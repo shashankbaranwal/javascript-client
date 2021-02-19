@@ -1,1 +1,1 @@
-export { default as NotFound } from './NoMatch';
+export { default as NoMatch } from './NoMatch';

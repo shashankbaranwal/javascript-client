@@ -1,26 +1,39 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useState } from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { CircularProgress, Typography } from '@material-ui/core';
 
-export const IsLoadingHOC = (WrappedComponent) => {
-  function HOC(props) {
-    const [isLoading, setLoading] = useState(true);
-
-    const setLoadingState = (isComponentLoading) => {
-      setLoading(isComponentLoading);
-    };
-
+const withLoaderAndMessage = (WrappedComponent) => {
+  const WithLoaderAndMessage = (props) => {
+    const { loader, dataLength, ...rest } = props;
+    if (loader) {
+      return (
+        <Typography component="div" align="center">
+          <CircularProgress size={24} />
+        </Typography>
+      );
+    }
+    if (!dataLength) {
+      return (
+        <Typography align="center" variant="h3">OOPS!, No More Trainees</Typography>
+      );
+    }
     return (
-      <>
-        {isLoading && (
-          <div style={{ marginLeft: '700px', marginTop: '30px' }}>
-            <CircularProgress color="secondary" />
-          </div>
-        )}
-        <WrappedComponent {...props} setLoading={setLoadingState} currentState={isLoading} />
-      </>
+      <WrappedComponent {...rest} />
     );
-  }
-  return HOC;
+  };
+
+  WithLoaderAndMessage.propTypes = {
+    loader: PropTypes.bool,
+    dataLength: PropTypes.number,
+  };
+
+  WithLoaderAndMessage.defaultProps = {
+    loader: false,
+    dataLength: 0,
+  };
+
+  return WithLoaderAndMessage;
 };
-export default IsLoadingHOC;
+
+export default withLoaderAndMessage;

@@ -1,84 +1,52 @@
-import React, { Component, createContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import MuiAlert from '@material-ui/lab/Alert';
-import { Snackbar } from '@material-ui/core';
+import SnackBar from './SnackBar';
 
-export const SnackBarContext = createContext(() => { });
+export const SnackbarContext = React.createContext();
 
-const CustomizedSnackbars = (props) => {
-  const {
-    onClose, open, message, status,
-  } = props;
+const SnackBarProvider = (props) => {
+  const { children } = props;
+  const [snackValues, setSnackValues] = React.useState({
+    status: '', message: '', open: false,
+  });
 
-  return (
-    <div>
-      <Snackbar open={open} onClose={onClose} autoHideDuration={4000}>
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity={status}
-          onClose={onClose}
-        >
-          {message}
-        </MuiAlert>
-      </Snackbar>
-    </div>
-  );
-};
-
-CustomizedSnackbars.propTypes = {
-  message: PropTypes.string.isRequired,
-  onClose: PropTypes.func,
-  status: PropTypes.oneOf(['success', 'warning', 'error', 'info'])
-    .isRequired,
-  open: PropTypes.bool.isRequired,
-};
-
-CustomizedSnackbars.defaultProps = {
-  onClose: () => { },
-};
-
-export default class SnackBarProvider extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-      status: '',
-      message: '',
-    };
-  }
-
-  openSnackBar = (message, status) => {
-    this.setState({
-      open: true,
+  const openSnackBar = (status, message) => {
+    setSnackValues({
       status,
       message,
+      open: true,
     });
   };
 
-  closeSnackBar = () => {
-    this.setState({ open: false });
+  const snackBarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackValues({ open: false });
   };
 
-  render() {
-    const { children } = this.props;
-    const { message, status, open } = this.state;
-
-    return (
-      <>
-        <SnackBarContext.Provider value={this.openSnackBar}>
-          {children}
-        </SnackBarContext.Provider>
-        <CustomizedSnackbars
-          message={message}
-          status={status}
-          onClose={this.closeSnackBar}
-          open={open}
+  return (
+    <>
+      <SnackbarContext.Provider
+        value={{
+          openSnackbar: openSnackBar,
+        }}
+      >
+        {children}
+        <SnackBar
+          duration={3000}
+          open={snackValues.open}
+          onClose={snackBarClose}
+          message={snackValues.message}
+          status={snackValues.status}
         />
-      </>
-    );
-  }
-}
+      </SnackbarContext.Provider>
+    </>
+  );
+};
+
 SnackBarProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
+export default SnackBarProvider;

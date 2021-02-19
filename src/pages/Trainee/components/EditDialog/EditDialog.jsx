@@ -1,215 +1,162 @@
-/* eslint-disable react/destructuring-assignment */
-import React, { Component } from 'react';
+/* eslint-disable react/forbid-prop-types */
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import * as yup from 'yup';
 import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  TextField,
-  InputAdornment,
+  DialogActions, Dialog, DialogContentText, DialogContent, CircularProgress,
+  DialogTitle, Button, TextField, InputAdornment, makeStyles,
 } from '@material-ui/core';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import EmailIcon from '@material-ui/icons/Email';
+import * as yup from 'yup';
 
-import { Email, Person } from '@material-ui/icons';
-import { SnackBarContext } from '../../../../contexts';
-import callApi from '../../../../libs/utils/api';
+export const useStyle = makeStyles(() => ({
+  margin: {
+    margin: '10px 0',
+  },
+}));
 
-class EditDialog extends Component {
-  schema = yup.object().shape({
-    name: yup.string().required().min(3).label('Name'),
-    email: yup.string().email().required().label('Email'),
+const EditDialog = (props) => {
+  const {
+    open, onClose, onSubmit, defaultValues, loading,
+  } = props;
+  const { email, name } = defaultValues;
+  const classes = useStyle();
+  const [state, setstate] = useState({
+    name: '', email: '',
+  });
+  const [onBlur, setBlur] = useState({});
+  const [schemaErrors, setSchemaErrors] = useState({});
+
+  const schema = yup.object().shape({
+    name: yup.string().required('Name is required').min(3, 'should have more then 3 characters'),
+    email: yup.string().required('Email is required').email(),
   });
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: this.props.details.name,
-      email: this.props.details.email,
-      touched: {
-        name: false,
-        email: false,
-      },
-    };
-  }
-
-  handleNameValue = (event) => {
-    this.setState({ name: event.target.value }, () => {
-    });
+  const handleErrors = (errors) => {
+    const schemaError = {};
+    if (Object.keys(errors).length) {
+      errors.inner.forEach((error) => {
+        schemaError[error.path] = error.message;
+      });
+    }
+    setSchemaErrors(schemaError);
   };
 
-  handleEmailValue = (event) => {
-    this.setState({ email: event.target.value }, () => {
-    });
+  const handleValidate = () => {
+    schema.validate(state, { abortEarly: false })
+      .then(() => { handleErrors({}); })
+      .catch((err) => { handleErrors(err); });
   };
 
-  getError = (field) => {
-    const { touched } = this.state;
-    if (touched[field] && this.hasErrors()) {
-      try {
-        this.schema.validateSyncAt(field, this.state);
-      } catch (err) {
-        return err.message;
-      }
+  const handleBlur = (label) => {
+    setBlur({ ...onBlur, [label]: true });
+  };
+
+  const getError = (label) => {
+    if (onBlur[label]) {
+      return schemaErrors[label] || '';
     }
     return '';
   };
 
-  hasErrors = () => {
-    const { state } = this;
-    try {
-      this.schema.validateSync(state);
-    } catch (err) {
-      return true;
-    }
-    return false;
-  };
+  useEffect(() => {
+    handleValidate();
+  }, [state]);
 
-  handleButtonError = () => {
-    if (this.hasErrors()) {
-      return false;
-    }
-    return true;
-  };
+  const hasErrors = () => Object.keys(schemaErrors).length !== 0;
 
-  isTouched = (field) => {
-    const { touched } = this.state;
-    this.setState({
-      touched: {
-        ...touched,
-        [field]: true,
-      },
+  const isTouched = () => Object.keys(onBlur).length !== 0;
+
+  const handleInputField = (label, input) => {
+    setstate({
+      ...state, [label]: input.target.value,
     });
   };
 
-  isValid = (item) => {
-    const { state } = this;
-    const { touched } = state;
-
-    if (touched[[item]] === false) {
-      return false;
-    }
-    return this.hasErrors();
+  const handleClose = () => {
+    setBlur({});
+    onClose();
   };
 
-  onConsole = () => {
-    const { name, email } = this.state;
-    // eslint-disable-next-line no-console
-    console.log('Edited Item', { name, email });
-    this.setState({
-      buttonEnable: false,
-      name: '',
-      email: '',
-      touched: {
-        name: false,
-        email: false,
-      },
+  const handleSubmit = (details) => {
+    onSubmit(details);
+    setstate({
+      name: '', email: '',
     });
+    setBlur({});
   };
 
-  onSubmit = async (e, value) => {
-    e.preventDefault();
-    const { onClose, details, renderTrainee } = this.props;
-    const { name, email } = this.state;
-    const { originalId } = details;
-    await callApi('/trainee', 'PUT', { originalId, name, email })
-      .then(() => {
-        this.onConsole();
-        value('Successfully Edited!', 'success');
-        renderTrainee();
-        onClose();
-      })
-      .catch(() => {
-        value('Date Invalid', 'error');
-        onClose();
-      });
-  };
-
-  render() {
-    const { editOpen, onClose, details } = this.props;
-    return (
-      <SnackBarContext.Consumer>
-        {(value) => (
-          <Dialog open={editOpen} onClose={this.handleClose}>
-            <DialogTitle>Edit Trainee</DialogTitle>
-            <DialogContent>
-              <DialogContentText>Enter your trainee details</DialogContentText>
-              <TextField
-                label="Name"
-                defaultValue={details.name}
-                margin="normal"
-                variant="outlined"
-                onChange={this.handleNameValue}
-                onBlur={() => this.isTouched('name')}
-                helperText={this.getError('name')}
-                error={this.isValid('name')}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <TextField
-                label="Email Address"
-                defaultValue={details.email}
-                margin="normal"
-                variant="outlined"
-                onChange={this.handleEmailValue}
-                onBlur={() => this.isTouched('email')}
-                helperText={this.getError('email')}
-                error={this.isValid('email')}
-                fullWidth
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button color="primary" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={(event) => this.onSubmit(event, value)}
-                disabled={!this.handleButtonError()}
-              >
-                Submit
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
-      </SnackBarContext.Consumer>
-    );
-  }
-}
+  return (
+    <Dialog
+      open={open}
+      fullWidth
+      onClose={onClose}
+      maxWidth="md"
+    >
+      <DialogTitle>
+        Edit Trainee
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText fontSize={16}>
+          Edit Your New Details
+        </DialogContentText>
+        <TextField
+          required
+          fullWidth
+          error={!!getError('name')}
+          helperText={getError('name')}
+          className={classes.margin}
+          defaultValue={name}
+          onChange={(input) => handleInputField('name', input)}
+          onBlur={() => handleBlur('name')}
+          label="Name"
+          id="outlined-start-adornment"
+          InputProps={{
+            startAdornment: <InputAdornment position="start"><AccountCircleIcon opacity="0.6" /></InputAdornment>,
+          }}
+          variant="outlined"
+        />
+        <TextField
+          required
+          fullWidth
+          error={!!getError('email')}
+          helperText={getError('email')}
+          className={classes.margin}
+          defaultValue={email}
+          onChange={(input) => handleInputField('email', input)}
+          onBlur={() => handleBlur('email')}
+          label="Email"
+          InputProps={{
+            startAdornment: <InputAdornment position="start"><EmailIcon opacity="0.6" /></InputAdornment>,
+          }}
+          variant="outlined"
+        />
+      </DialogContent>
+      <DialogActions className={classes.margin}>
+        <Button autoFocus onClick={handleClose} color="secondary">
+          Cancel
+        </Button>
+        <Button disabled={hasErrors() || !isTouched()} onClick={() => handleSubmit(state)} color="primary">
+          Submit
+          { loading && <CircularProgress />}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 EditDialog.propTypes = {
-  details: PropTypes.objectOf(PropTypes.any).isRequired,
-  onClose: PropTypes.func,
-  editOpen: PropTypes.bool,
-  // history: PropTypes.objectOf(PropTypes.any).isRequired,
-  renderTrainee: PropTypes.func.isRequired,
+  open: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  defaultValues: PropTypes.object,
+  loading: PropTypes.bool,
 };
 
 EditDialog.defaultProps = {
-  onClose: () => { },
-  editOpen: false,
+  open: false,
+  defaultValues: {},
+  loading: false,
 };
 
 export default EditDialog;
