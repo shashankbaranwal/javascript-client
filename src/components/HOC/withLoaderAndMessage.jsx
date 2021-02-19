@@ -1,28 +1,39 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
+import { CircularProgress, Typography } from '@material-ui/core';
 
-export default function withLoaderAndMessage(WrappedComponent) {
-  function WithLoaderAndMessage(props) {
-    const { loader, dataCount } = props;
+const withLoaderAndMessage = (WrappedComponent) => {
+  const WithLoaderAndMessage = (props) => {
+    const { loader, dataLength, ...rest } = props;
     if (loader) {
       return (
-        <CircularProgress size={120} color="secondary" style={{ marginLeft: '43%', marginTop: '20%' }} />
+        <Typography component="div" align="center">
+          <CircularProgress size={24} />
+        </Typography>
       );
     }
-    if (dataCount === 0) {
+    if (!dataLength) {
       return (
-        <div style={{ textAlign: 'center', margin: '10%' }}><h1>No more data</h1></div>
+        <Typography align="center" variant="h3">OOPS!, No More Trainees</Typography>
       );
     }
     return (
-      <WrappedComponent {...props} />
+      <WrappedComponent {...rest} />
     );
-  }
-  WithLoaderAndMessage.propTypes = {
-    loader: PropTypes.bool.isRequired,
-    dataCount: PropTypes.number.isRequired,
   };
+
+  WithLoaderAndMessage.propTypes = {
+    loader: PropTypes.bool,
+    dataLength: PropTypes.number,
+  };
+
+  WithLoaderAndMessage.defaultProps = {
+    loader: false,
+    dataLength: 0,
+  };
+
   return WithLoaderAndMessage;
-}
+};
+
+export default withLoaderAndMessage;

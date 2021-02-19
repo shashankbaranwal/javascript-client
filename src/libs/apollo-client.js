@@ -1,13 +1,23 @@
-import { InMemoryCache } from 'apollo-boost';
-import { ApolloClient } from '@apollo/client';
-import { split } from 'apollo-link';
-import { HttpLink } from 'apollo-link-http';
+import {
+  ApolloClient, HttpLink, InMemoryCache, split,
+} from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from 'apollo-link-context';
-import { WebSocketLink } from 'apollo-link-ws';
-import { getMainDefinition } from 'apollo-utilities';
+import { WebSocketLink } from '@apollo/client/link/ws';
 
-console.log(process.env.REACT_APP_Apollo_URI);
-const httplink = new HttpLink({ uri: process.env.REACT_APP_Apollo_URI });
+const httpLink = new HttpLink({
+  uri: process.env.REACT_APP_APOLLO_URL,
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token,
+    },
+  };
+});
 
 const wsLink = new WebSocketLink({
   uri: 'ws://localhost:9000/graphql',
@@ -16,33 +26,21 @@ const wsLink = new WebSocketLink({
   },
 });
 
-const authLink = setContext((_, { headers }) => {
-// get the authentication token if it's exists
-  const token = localStorage.getItem('token');
-  // return the headers to the context so httplink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `${token}` : '',
-    },
-  };
-});
-
-const link = split(
+const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);
     return (
       definition.kind === 'OperationDefinition'
-          && definition.operation === 'subscription'
+      && definition.operation === 'subscription'
     );
   },
   wsLink,
-  httplink,
+  httpLink,
 );
 
-const apolloclient = new ApolloClient({
+const apolloClient = new ApolloClient({
+  link: authLink.concat(splitLink),
   cache: new InMemoryCache(),
-  link: authLink.concat(link),
 });
 
-export default apolloclient;
+export default apolloClient;

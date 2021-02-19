@@ -1,21 +1,40 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
-const UPDATED_TRAINEE_SUB = gql`
-    subscription {
-        traineeUpdated {
+export const TRAINEE_ADDED = gql`
+  subscription TraineeAdded{
+    traineeAdded{
+      status
+      data {
+        originalId
         name
         email
-        }
+        createdAt
+      }
+      message
     }
+  }
 `;
 
-const DELETE_TRAINEE_SUB = gql`
-    subscription {
-        traineeDeleted
+export const TRAINEE_UPDATED = gql`
+  subscription TraineeUpdated{
+    traineeUpdated{
+      status
+      data {
+        originalId
+        name
+        email
+        createdAt
+      }
+      message
     }
+  }
 `;
 
-export {
-  DELETE_TRAINEE_SUB,
-  UPDATED_TRAINEE_SUB,
-};
+export const TRAINEE_DELETED = gql`
+  subscription TraineeDeleted{
+    traineeDeleted{
+      status
+      message
+    }
+  }
+`;

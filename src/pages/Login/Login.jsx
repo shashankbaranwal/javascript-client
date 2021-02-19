@@ -1,212 +1,196 @@
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import CircularProgress from '@material-ui/core/CircularProgress';
+/* eslint-disable react/forbid-prop-types */
+/* eslint-disable no-shadow */
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import {
+  Container, Typography, Button, TextField, InputAdornment, makeStyles, CircularProgress,
+} from '@material-ui/core';
+import EmailIcon from '@material-ui/icons/Email';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { useMutation } from '@apollo/client';
 import * as yup from 'yup';
-import { SnackBarContext } from '../../contexts';
-// import callApi from '../../libs/utils/api';
+// import { callApi } from '../../lib/utils';
+import { SnackbarContext } from '../../contexts';
+import { LOGIN_USER } from './mutation';
 
-const styles = (theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
+export const useStyle = makeStyles((theme) => ({
+  flexcolumnCenter: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    padding: '40px 30px',
+    borderRadius: '4px',
+    border: '1px solid silver',
+    marginTop: theme.spacing(10),
+    boxSizing: 'border-box',
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+  iconRound: {
+    padding: '4px',
+    borderRadius: '50%',
+    background: theme.palette.secondary.main,
+    color: 'white',
+    margin: '20px',
   },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(1),
+  buttonLogin: {
+    marginTop: '25px',
   },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
+  buttonProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
   },
-  spinner: {
-    display: 'flex',
-    '& > * + *': {
-      marginLeft: theme.spacing(2),
-    },
-  },
-});
+}));
 
-class Login extends Component {
-  schema = yup.object().shape({
-    email: yup.string().required(),
-    password: yup.string().required(),
+const LoginUi = (props) => {
+  const { history } = props;
+  const classes = useStyle();
+  const schema = yup.object().shape({
+    email: yup.string()
+      .required()
+      .email(),
+    password: yup.string()
+      .required('password is missing')
+      .min(8, 'minimum 8 characters'),
   });
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      password: '',
-      spinner: false,
-      touched: {
-        touchedEmail: false,
-        touchedPassword: false,
-      },
-    };
-    this.baseState = this.state;
-  }
+  const [state, setstate] = useState({
+    email: '', password: '',
+  });
+  const [loginUser] = useMutation(LOGIN_USER);
+  const [onBlur, setBlur] = useState({});
 
-  handleButtonDisbale = () => {
-    const { state } = this;
-    try {
-      this.schema.validateSync(state);
-    } catch (err) {
-      return true;
-    }
-    return false;
-  }
+  const [loading, setLoading] = useState(false);
 
-  onSubmit = async (e, value) => {
-    e.preventDefault();
-    const { history, loginUser } = this.props;
-    const { email, password } = this.state;
-    this.setState({ spinner: true });
-    await loginUser({ variables: { email, password } })
-      .then((res) => {
-        localStorage.setItem('token', res.data.loginUser);
-        value('Successfully logged', 'success');
-        this.setState({ spinner: false });
-        history.push('/trainee');
-      })
-      .catch(() => {
-        value('Invalid credentials', 'error');
-        this.setState(this.baseState);
+  const [schemaErrors, setSchemaErrors] = useState({});
+
+  const handleErrors = (errors) => {
+    const schemaError = {};
+    if (Object.keys(errors).length) {
+      errors.inner.forEach((error) => {
+        schemaError[error.path] = error.message;
       });
+    }
+    setSchemaErrors(schemaError);
   };
 
-  handleNameChange = async (e, field, touchField) => {
-    const { touched } = this.state;
-    await this.setState({ [field]: e.target.value, touched: { ...touched, [touchField]: false } });
-    if (field === 'email') {
-      this.validateEmail();
+  const handleValidate = () => {
+    schema.validate(state, { abortEarly: false })
+      .then(() => { handleErrors({}); })
+      .catch((err) => { handleErrors(err); });
+  };
+
+  const handleBlur = (label) => {
+    setBlur({ ...onBlur, [label]: true });
+  };
+
+  const getError = (label) => {
+    if (onBlur[label]) {
+      return schemaErrors[label] || '';
     }
-  }
+    return '';
+  };
 
-  validateEmail = () => {
-    const { email, touched } = this.state;
-    if (!new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i).test(email)) {
-      this.setState({
-        touched: {
-          ...touched,
-          touchedEmail: true,
-        },
-      });
+  useEffect(() => {
+    handleValidate();
+  }, [state]);
+
+  const hasErrors = () => Object.keys(schemaErrors).length !== 0;
+
+  const isTouched = () => Object.keys(onBlur).length !== 0;
+
+  const handleInputField = (label, input) => {
+    setstate({
+      ...state, [label]: input.target.value,
+    });
+  };
+
+  const handleCallApi = async (openSnackbar) => {
+    const { email, password } = state;
+    try {
+      const response = await loginUser({ variables: { email, password } });
+      console.log('===> Response', response);
+      const { data } = response;
+      if (data) {
+        openSnackbar('success', 'login successfull');
+        localStorage.setItem('token', data.loginUser);
+        history.push('/');
+      } else {
+        setLoading(false);
+        openSnackbar('error', 'unsuccessfull');
+      }
+    } catch (err) {
+      setLoading(false);
+      openSnackbar('error', 'Something Went Wrong');
     }
-  }
+  };
 
-  isTouched = (field, touchedField) => {
-    const { touched } = this.state;
-    // eslint-disable-next-line react/destructuring-assignment
-    if (this.state[field] === '') {
-      this.setState({
-        touched: {
-          ...touched,
-          [touchedField]: true,
-        },
-      });
-    }
-  }
+  const hangleLogin = (openSnackbar) => {
+    setLoading(true);
+    console.log(state);
+    handleCallApi(openSnackbar);
+  };
 
-  render() {
-    const { classes } = this.props;
-    const {
-      email, password, spinner,
-    } = this.state;
-    const {
-      touchedEmail, touchedPassword,
-    // eslint-disable-next-line react/destructuring-assignment
-    } = this.state.touched;
-    return (
-      <SnackBarContext.Consumer>
-        {(value) => (
-          <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <div className={classes.paper}>
-              <Avatar className={classes.avatar}>
-                <LockOutlinedIcon />
-              </Avatar>
-              <Typography component="h1" variant="h5">
-                Sign in
-              </Typography>
-              <form className={classes.form} noValidate>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  value={email}
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                  onChange={(e) => this.handleNameChange(e, 'email', 'touchedEmail')}
-                  onBlur={() => this.isTouched('email', 'touchedEmail')}
-                  error={touchedEmail}
-                  // eslint-disable-next-line no-nested-ternary
-                  helperText={touchedEmail ? (email === '' ? 'Email is Required' : 'Enter the valid Email') : ' '}
-                />
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  value={password}
-                  autoComplete="current-password"
-                  onChange={(e) => this.handleNameChange(e, 'password', 'touchedPassword')}
-                  onBlur={() => this.isTouched('password', 'touchedPassword')}
-                  error={touchedPassword}
-                  helperText={touchedPassword ? 'Password is Required' : ' '}
-                />
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                  disabled={this.handleButtonDisbale()}
-                  onClick={(event) => this.onSubmit(event, value)}
-                >
-                  {!spinner && ('Sign In')}
-                  {
-                    spinner && (
-                      <div className={classes.root}>
-                        <CircularProgress color="secondary" />
-                      </div>
-                    )
-                  }
-                </Button>
-              </form>
-            </div>
-          </Container>
-        )}
-      </SnackBarContext.Consumer>
-    );
-  }
-}
+  return (
+    <SnackbarContext.Consumer>
+      {({ openSnackbar }) => (
+        <Container
+          maxWidth="xs"
+        >
+          <div className={classes.flexcolumnCenter}>
+            <LockOutlinedIcon className={classes.iconRound} />
+            <Typography variant="h5">
+              Login
+            </Typography>
+            <form>
+              <TextField
+                required
+                fullWidth
+                size="small"
+                margin="normal"
+                error={!!getError('email')}
+                helperText={getError('email')}
+                onChange={(input) => handleInputField('email', input)}
+                onBlur={() => handleBlur('email')}
+                label="Email"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><EmailIcon style={{ fontSize: 20 }} opacity="0.6" /></InputAdornment>,
+                }}
+                variant="outlined"
+              />
+              <TextField
+                required
+                fullWidth
+                margin="normal"
+                size="small"
+                type="password"
+                error={!!getError('password')}
+                helperText={getError('password')}
+                onChange={(input) => handleInputField('password', input)}
+                onBlur={() => handleBlur('password')}
+                label="Password"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><VisibilityOffIcon style={{ fontSize: 20 }} opacity="0.6" /></InputAdornment>,
+                }}
+                variant="outlined"
+              />
+              <Button className={classes.buttonLogin} fullWidth disabled={hasErrors() || !isTouched() || loading} onClick={() => hangleLogin(openSnackbar)} color="primary" variant="contained">
+                Login
+                { loading && <CircularProgress size={24} className={classes.buttonProgress} /> }
+              </Button>
+            </form>
+          </div>
+        </Container>
+      )}
+    </SnackbarContext.Consumer>
 
-Login.propTypes = {
-  classes: PropTypes.objectOf(PropTypes.string).isRequired,
-  history: PropTypes.objectOf(PropTypes.any).isRequired,
-  loginUser: PropTypes.func.isRequired,
+  );
 };
 
-export default withRouter(withStyles(styles)(Login));
+LoginUi.propTypes = {
+  history: PropTypes.object.isRequired,
+};
+
+export default LoginUi;

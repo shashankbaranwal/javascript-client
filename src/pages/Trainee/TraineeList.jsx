@@ -1,254 +1,316 @@
-/* eslint-disable max-len */
-import React, { Component } from 'react';
+/* eslint-disable react/forbid-prop-types */
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Button, CssBaseline } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { graphql } from '@apollo/react-hoc';
-
+import moment from 'moment';
+import { useQuery, useMutation } from '@apollo/client';
 import { AddDialog, EditDialog, DeleteDialog } from './components';
-import { TableComponent } from '../../components/index';
-import { getFormattedDate } from '../../libs/utils/getFormattedDate';
-import { GET } from './query';
-import { UPDATED_TRAINEE_SUB, DELETE_TRAINEE_SUB } from './subscriptions';
+import { TableComponent, withLoaderAndMessage } from '../../components';
+import { SnackbarContext } from '../../contexts';
+import { GETALL_TRAINEES } from './query';
+import { CREATE_TRAINEE, UPDATE_TRAINEE, DELETE_TRAINEE } from './mutation';
+import { TRAINEE_UPDATED, TRAINEE_DELETED, TRAINEE_ADDED } from './subscriptions';
 
-const dsend = 'desc';
-class TraineeList extends Component {
-  constructor() {
-    super();
-    this.state = {
-      open: false,
-      sortedBy: 'createdAt',
-      order: dsend,
-      page: 0,
-      edit: false,
-      deleteDialog: false,
-      limit: 10,
-      traineeInfo: {},
-      loader: false,
-    };
+const TraineeList = (props) => {
+  const { match, history } = props;
+  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [order, setOrder] = useState();
+  const [orderBy, setOrderBy] = useState();
+  const [page, setPage] = useState(0);
+  const [details, setDetails] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [limit, setLimit] = useState(5);
+  const skip = page * limit;
+
+  const {
+    subscribeToMore, data, loading: getAllTraineeLoading,
+  } = useQuery(GETALL_TRAINEES, {
+    variables: {
+      skip,
+      limit,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const handleChangeRowsPerPage = (event) => {
+    setLimit(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  let trainees = [];
+  let traineeCount = 0;
+  if (!getAllTraineeLoading) {
+    try {
+      const { getAll } = data;
+      trainees = getAll;
+      traineeCount = getAll.length;
+    } catch {
+      trainees = [];
+      traineeCount = 0;
+    }
   }
+  console.log(trainees);
+  const [createTrainee] = useMutation(CREATE_TRAINEE);
+  const [updateTrainee] = useMutation(UPDATE_TRAINEE);
+  const [deleteTrainee] = useMutation(DELETE_TRAINEE);
 
-  componentDidMount() {
-    this.setState({ loader: true });
-    setTimeout(() => {
-      this.setState({ loader: false });
-    }, 600);
-    const { data: { subscribeToMore } } = this.props;
+  const EnhancedTable = withLoaderAndMessage(TableComponent);
+
+  useEffect(() => {
     subscribeToMore({
-      document: UPDATED_TRAINEE_SUB,
+      document: TRAINEE_UPDATED,
       updateQuery: (prev, { subscriptionData }) => {
-        console.log('Sub', subscriptionData, 'Prev', prev);
-        if (!subscriptionData) return prev;
-        const { getAllTrainees: { records } } = prev;
-        const { data: { traineeUpdated } } = subscriptionData;
-        const updatedRecords = [records].map((record) => {
-          console.log('Recordss ', record);
-          if (record.originalId === traineeUpdated.originalId) {
-            console.log('found match ');
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList } = {} } = {} } = prev;
+        const { data: { traineeUpdated: { data: newTrainee } = {} } = {} } = subscriptionData;
+        const newList = UsersList.map((trainee) => {
+          if (trainee.originalId === newTrainee.originalId) {
             return {
-              ...record,
-              ...traineeUpdated,
+              ...trainee,
+              ...newTrainee,
             };
           }
-          return record;
+          return trainee;
         });
         return {
           getAllTrainees: {
-            ...prev.getAllTrainees,
-            ...prev.getAllTrainees.TraineeCount,
-            records: updatedRecords,
+            ...prev,
+            data: {
+              UsersList: newList,
+            },
           },
         };
       },
     });
     subscribeToMore({
-      document: DELETE_TRAINEE_SUB,
+      document: TRAINEE_DELETED,
       updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData) return prev;
-        const { getAllTrainees: { records } } = prev;
-        const updatedRecords = [records].filter((record) => record.originalId !== subscriptionData.originalId);
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList = [], totalCount = 0 } } = {} } = prev;
+        const newList = UsersList.map((trainee) => {
+          if (trainee.originalId === details.originalId) {
+            return {};
+          }
+          return trainee;
+        });
         return {
           getAllTrainees: {
-            ...prev.getAllTrainees,
-            ...prev.getAllTrainees.TraineeCount - 1,
-            records: updatedRecords,
+            ...prev,
+            data: {
+              UsersList: newList,
+              totalCount: totalCount - 1,
+            },
           },
         };
       },
     });
-  }
-
-  onOpen = () => {
-    this.setState({ open: true });
-  };
-
-  onCloseEvent = () => {
-    this.setState({ open: false });
-  };
-
-  editDialogOpen = (item) => {
-    this.selectedItem = item;
-    this.setState({ edit: true, traineeInfo: item });
-  };
-
-  editDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ edit: false });
-  };
-
-  handleEdit = (item) => {
-    console.log(item);
-    this.editDialogClose();
-  }
-
-  deleteDialogOpen = (item) => {
-    this.selectedIem = item;
-    this.setState({ deleteDialog: true, traineeInfo: item });
-  };
-
-  deleteDialogClose = () => {
-    this.selectedIem = null;
-    this.setState({ deleteDialog: false });
-  };
-
-  handleDelete = () => {
-    const { traineeInfo } = this.state;
-    console.log(traineeInfo);
-    this.deleteDialogClose();
-  }
-
-  handleSort = (field) => {
-    const { order, orderBy } = this.state;
-    let newOrder = 'asc';
-    if (orderBy === field && order === 'asc') {
-      newOrder = 'desc';
-    }
-    this.setState({
-      order: newOrder,
-      orderBy: field,
-    }, () => {
-      this.traineesFromDataBase();
-    });
-  }
-
-  handlePageChange = (refetch) => (event, page) => {
-    this.setState({ page }, () => {
-      refetch({ skip: String(page * 10), limit: String(10) });
-    });
-  }
-
-  handleSubmit = () => {
-    this.setState({ open: false });
-  }
-
-  handleSelect = (id) => {
-    const { match, history } = this.props;
-    return (
-      history.push(`${match.path}/${id}`)
-    );
-  }
-
-  renderData = () => {
-    this.setState({ loader: false });
-  }
-
-  render() {
-    const {
-      data: {
-        getAllTrainees: { data = [], totalCount = 0 } = {},
-        refetch,
+    subscribeToMore({
+      document: TRAINEE_ADDED,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) return prev;
+        const { getAllTrainees: { data: { UsersList, totalCount } = {} } = {} } = prev;
+        const { data: { traineeAdded: { data: newTrainee } = {} } = {} } = subscriptionData;
+        const newList = [newTrainee, ...UsersList];
+        return {
+          getAllTrainees: {
+            ...prev,
+            data: {
+              UsersList: newList,
+              totalCount: totalCount + 1,
+            },
+          },
+        };
       },
-    } = this.props;
+    });
+  }, []);
 
-    const {
-      open, deleteDialog, order, sortedBy, page, edit, loader, traineeInfo, limit,
-    } = this.state;
-    return (
-      <>
-        <div style={{ float: 'right' }}>
+  const handleSort = (property) => {
+    setOrder(order === 'asc' && orderBy === property ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleSelect = (property) => {
+    history.push(`${match.path}/${property}`);
+  };
+
+  const handleOpenAddTrainee = () => {
+    setOpen(!open);
+  };
+
+  const handleSubmit = async (openSnackbar, state) => {
+    setLoading(true);
+    console.log(state);
+    const { name, email, password } = state;
+    try {
+      const response = await createTrainee({ variables: { name, email, password } });
+      const { data: { createTrainee: { message, status } = {} } = {} } = response;
+      if (status === 'success') {
+        openSnackbar(status, message);
+        setOpen(false);
+      } else {
+        openSnackbar('error', message);
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      openSnackbar('error', 'Something Went Wrong');
+    }
+  };
+
+  const getDateFormatted = (date) => moment(date).format('dddd, MMMM Do yyyy, hh:mm:ss a');
+
+  const handleEditDialogOpen = (traineeDetails) => {
+    setEditOpen(true);
+    setDetails(traineeDetails);
+  };
+
+  const handleDeleteDialogOpen = (traineeDetails) => {
+    setDeleteOpen(true);
+    setDetails(traineeDetails);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditOpen(false);
+  };
+
+  const handleEditDialogSubmit = async (openSnackbar, state) => {
+    setLoading(true);
+    console.log(state);
+    const { originalId } = details;
+    const { email, name } = state;
+    try {
+      const response = await updateTrainee({ variables: { id: originalId, email, name } });
+      const { data: { updateTrainee: { message = '', status = '' } = {} } = {} } = response;
+      if (status === 'success') {
+        openSnackbar(status, message);
+        setEditOpen(false);
+      } else {
+        openSnackbar('error', message);
+      }
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      openSnackbar('error', 'Something Went Wrong');
+    }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleDelete = async (openSnackbar) => {
+    setLoading(true);
+    console.log(details);
+    const { originalId } = details;
+    if (details.createdAt <= '2019-02-14') {
+      openSnackbar('error', 'Trainee cannot be Deleted');
+    } else {
+      try {
+        const response = await deleteTrainee({ variables: { id: originalId } });
+        const { data: { deleteTrainee: { message = {}, status = {} } = {} } = {} } = response;
+        if (status === 'success') {
+          openSnackbar(status, message);
+          setEditOpen(false);
+        } else {
+          openSnackbar('error', message);
+        }
+        setLoading(false);
+        if (page > 0 && trainees.length === 1) {
+          setPage(page - 1);
+        }
+      } catch {
+        openSnackbar('error', 'Something Went Wrong');
+      }
+    }
+    setDeleteOpen(false);
+  };
+
+  return (
+    <SnackbarContext.Consumer>
+      {({ openSnackbar }) => (
+        <>
+          <CssBaseline />
+          <Button size="large" variant="outlined" color="primary" onClick={handleOpenAddTrainee}>
+            Add Trainee
+          </Button>
+          <EnhancedTable
+            id="originalId"
+            data={trainees}
+            loader={getAllTraineeLoading}
+            dataLength={traineeCount}
+            column={[
+              {
+                field: 'name',
+                label: 'Name',
+              },
+              {
+                field: 'email',
+                label: 'Email Address',
+                format: (value) => value && value.toUpperCase(),
+              },
+              {
+                field: 'createdAt',
+                label: 'Date',
+                align: 'right',
+                format: getDateFormatted,
+              },
+            ]}
+            actions={[
+              {
+                icon: <EditIcon />,
+                handler: handleEditDialogOpen,
+              },
+              {
+                icon: <DeleteIcon />,
+                handler: handleDeleteDialogOpen,
+              },
+            ]}
+            order={order}
+            orderBy={orderBy}
+            onSort={handleSort}
+            onSelect={handleSelect}
+            page={page}
+            onChangePage={handleChangePage}
+            count={traineeCount}
+            rowsPerPage={limit}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+          />
           <AddDialog
             open={open}
-            onClose={this.onCloseEvent}
-            onSubmit={this.handleSubmit}
-            refetchQueries={refetch}
+            loading={loading}
+            onClose={handleOpenAddTrainee}
+            onSubmit={(addTraineeState) => handleSubmit(openSnackbar, addTraineeState)}
           />
-        </div>
-        <TableComponent
-          id="id"
-          data={data}
-          column={[
-            {
-              field: 'name',
-              label: 'Name',
-            },
-            {
-              field: 'email',
-              label: 'Email Address',
-              format: (value) => value && value.toUpperCase(),
-            },
-            {
-              field: 'createdAt',
-              label: 'Date',
-              align: 'right',
-              format: getFormattedDate,
-            },
-          ]}
-          actions={[
-            {
-              icon: <EditIcon />,
-              handler: this.editDialogOpen,
-            },
-            {
-              icon: <DeleteIcon />,
-              handler: this.deleteDialogOpen,
-            },
-          ]}
-          sortedBy={sortedBy}
-          order={order}
-          onSort={this.handleSort}
-          count={totalCount}
-          page={page}
-          rowsPerPage={limit}
-          onPageChange={this.handlePageChange(refetch)}
-          onSelect={this.handleSelect}
-          loader={loader}
-          dataCount={totalCount}
-        />
-        <>
-          { edit && (
-            <EditDialog
-              editOpen={edit}
-              onClose={this.editDialogClose}
-              details={traineeInfo}
-              renderTrainee={data}
-              refetchQueries={refetch}
-            />
-          )}
-          { deleteDialog && (
-            <DeleteDialog
-              deleteOpen={deleteDialog}
-              onClose={this.deleteDialogClose}
-              details={traineeInfo}
-              refetchQueries={refetch}
-            />
-          )}
+          <EditDialog
+            open={editOpen}
+            loading={loading}
+            onClose={handleEditDialogClose}
+            onSubmit={(editTraineeState) => handleEditDialogSubmit(openSnackbar, editTraineeState)}
+            defaultValues={details}
+          />
+          <DeleteDialog
+            open={deleteOpen}
+            loading={loading}
+            onClose={handleDeleteClose}
+            onDelete={() => handleDelete(openSnackbar)}
+          />
         </>
-      </>
-    );
-  }
-}
-
-TraineeList.propTypes = {
-  match: PropTypes.objectOf(PropTypes.any).isRequired,
-  history: PropTypes.objectOf(PropTypes.any).isRequired,
-  data: PropTypes.isRequired,
+      )}
+    </SnackbarContext.Consumer>
+  );
 };
 
-export default graphql(GET,
-  {
-    options: {
-      variables: {
-        skip: '0', limit: '10', sortedBy: 'createdAt', sortedOrder: '-1',
-      },
-    },
-  })(TraineeList);
+TraineeList.propTypes = {
+  match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+};
+
+export default TraineeList;

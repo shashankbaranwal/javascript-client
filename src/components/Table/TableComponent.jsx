@@ -24,7 +24,8 @@ const StyledTableRow = withStyles((theme) => ({
 
 export default function TableComponent(props) {
   const {
-    id, data, column, order, orderBy, count, page, onPageChange, rowsPerPage, actions,
+    id, data, column, order, orderBy, count, page,
+    onPageChange, rowsPerPage, actions, handleChangeRowsPerPage,
   } = props;
   return (
     <TableContainer component={Paper} style={{ border: 'solid #c0c0c0 1px' }}>
@@ -72,7 +73,7 @@ export default function TableComponent(props) {
         </TableBody>
       </Table>
       <TablePagination
-        rowsPerPageOptions={[]}
+        rowsPerPageOptions={[5, 10, 15, 20, { value: 1, label: 'All' }]}
         component="div"
         count={count}
         rowsPerPage={rowsPerPage}
@@ -80,14 +81,16 @@ export default function TableComponent(props) {
         backIconButtonProps={{ 'aria-label': 'Previous Page' }}
         nextIconButtonProps={{ 'aria-label': 'Next Page' }}
         onChangePage={onPageChange}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
       />
     </TableContainer>
   );
 }
 TableComponent.propTypes = {
   id: PropTypes.string.isRequired,
+  handleChangeRowsPerPage: PropTypes.func.isRequired,
   column: PropTypes.arrayOf(Object).isRequired,
-  data: PropTypes.arrayOf(Object).isRequired,
+  data: PropTypes.arrayOf(Object),
   order: PropTypes.string,
   orderBy: PropTypes.string,
   onPageChange: PropTypes.func,
@@ -98,6 +101,7 @@ TableComponent.propTypes = {
 };
 TableComponent.defaultProps = {
   order: '',
+  data: [],
   orderBy: '',
   onPageChange: () => {},
   rowsPerPage: 10,
